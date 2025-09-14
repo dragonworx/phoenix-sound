@@ -56,13 +56,13 @@ export const updateStarfieldScene = (deltaTime: number, elapsedTime: number): vo
  * Setup scene environment (background, fog)
  */
 function setupSceneEnvironment(scene: THREE.Scene, config: StarfieldConfig): void {
-  // Black space background
-  scene.background = new THREE.Color(0x000000);
+  // Transparent background to allow galaxy to show through
+  scene.background = null;
 
-  // Add volumetric fog for atmospheric depth
+  // Reduce fog effect to not obscure distant galaxy
   scene.fog = new THREE.Fog(
     config.fogColor,
-    config.fogNear,
+    config.fogNear * 2, // Start fog further away
     config.fogFar
   );
 }
@@ -101,6 +101,10 @@ function setupCamera(camera: THREE.Camera): void {
     // Optimize FOV for space travel experience
     camera.fov = 60;
     camera.updateProjectionMatrix();
+
+    // Enable manual matrix updates for rotation
+    camera.matrixAutoUpdate = false;
+    camera.updateMatrix();
   }
 }
 

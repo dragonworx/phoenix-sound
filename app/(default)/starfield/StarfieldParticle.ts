@@ -81,6 +81,7 @@ export class StarfieldParticleSystem {
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      depthTest: true,
       vertexShader: `
         varying vec2 vUv;
         varying vec3 vColor;
@@ -119,6 +120,7 @@ export class StarfieldParticleSystem {
       this.config.maxStars
     );
     this.instancedMesh.frustumCulled = false;
+    this.instancedMesh.renderOrder = 1; // Render stars after galaxy background
     scene.add(this.instancedMesh);
   }
 
@@ -132,8 +134,9 @@ export class StarfieldParticleSystem {
 
   update(deltaTime: number, camera: THREE.Camera): void {
     const cameraPosition = camera.position;
-    let activeCount = 0;
+    const activeParticles: {index: number, particle: StarfieldParticle}[] = [];
 
+    // First pass: update particles and collect active ones
     for (let i = 0; i < this.particles.length; i++) {
       const particle = this.particles[i];
 
@@ -141,14 +144,21 @@ export class StarfieldParticleSystem {
         particle.update(deltaTime, this.config, cameraPosition);
 
         if (particle.isActive) {
-          this.updateInstanceMatrix(i, particle, camera);
-          activeCount++;
+          activeParticles.push({index: i, particle});
         }
       }
     }
 
+    // Sort particles by distance to reduce flickering (furthest first)
+    activeParticles.sort((a, b) => b.particle.distanceFromCamera - a.particle.distanceFromCamera);
+
+    // Second pass: update instance matrices in sorted order
+    for (let i = 0; i < activeParticles.length; i++) {
+      this.updateInstanceMatrix(i, activeParticles[i].particle, camera);
+    }
+
     this.instancedMesh.instanceMatrix.needsUpdate = true;
-    this.instancedMesh.count = activeCount;
+    this.instancedMesh.count = activeParticles.length;
   }
 
   private updateInstanceMatrix(index: number, particle: StarfieldParticle, camera: THREE.Camera): void {

@@ -13,6 +13,8 @@ export class StarfieldManager {
   // Movement state
   private cameraVelocity: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
   private lastUpdateTime: number = 0;
+  private rotationSpeed: number = 0.1; // radians per second
+  private galaxyPlane: THREE.Mesh | null = null;
 
   constructor(config: StarfieldConfig, scene: THREE.Scene, camera: THREE.Camera) {
     this.config = config;
@@ -27,8 +29,56 @@ export class StarfieldManager {
     // Start camera movement - move forward in negative Z direction (towards where camera is looking)
     this.cameraVelocity.set(0, 0, -this.config.cameraSpeed);
 
+    // Create galaxy background
+    this.createGalaxyBackground();
+
     // Spawn initial stars
     this.spawnInitialStars();
+  }
+
+  private createGalaxyBackground(): void {
+    // Load galaxy texture
+    const textureLoader = new THREE.TextureLoader();
+    const galaxyTexture = textureLoader.load('/galaxy.jpg');
+
+    // Calculate plane size based on camera FOV and distance to ensure edges are occluded
+    const distance = 1800; // Place galaxy far away but within camera range, reduced to avoid z-fighting
+    let planeSize = 2000; // Default size
+
+    if (this.camera instanceof THREE.PerspectiveCamera) {
+      const fov = this.camera.fov * (Math.PI / 180); // Convert to radians
+      const aspect = this.camera.aspect || 1;
+      const height = 2 * Math.tan(fov / 2) * distance;
+      const width = height * aspect;
+      planeSize = Math.max(width, height) * 1.2; // Make it 20% larger to ensure coverage
+    }
+
+    // Create plane geometry and material
+    const planeGeometry = new THREE.PlaneGeometry(planeSize, planeSize);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      map: galaxyTexture,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.9,
+      color: 0xffffff,
+      fog: false, // Don't apply fog to galaxy
+      depthWrite: false // Don't write to depth buffer so stars can render in front
+    });
+
+    // Create the mesh
+    this.galaxyPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+    // Position the plane far away in front of the camera
+    this.galaxyPlane.position.set(0, 0, -distance);
+
+    // Make sure the plane is visible by ensuring it faces the camera initially
+    this.galaxyPlane.lookAt(this.camera.position);
+
+    // Set render order to ensure galaxy renders behind stars
+    this.galaxyPlane.renderOrder = -1;
+
+    // Add to scene
+    this.scene.add(this.galaxyPlane);
   }
 
   private spawnInitialStars(): void {
@@ -77,6 +127,39 @@ export class StarfieldManager {
     const movement = this.cameraVelocity.clone().multiplyScalar(deltaTime);
     this.camera.position.add(movement);
 
+    // Rotate camera around Z-axis (roll rotation)
+    const rotationAmount = this.rotationSpeed * deltaTime;
+
+    if (this.camera instanceof THREE.PerspectiveCamera) {
+      // Create rotation quaternion for Z-axis rotation
+      const rotationQuaternion = new THREE.Quaternion();
+      rotationQuaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotationAmount);
+
+      // Apply rotation to camera's quaternion
+      this.camera.quaternion.multiplyQuaternions(rotationQuaternion, this.camera.quaternion);
+
+      // Update the camera matrix
+      this.camera.updateMatrix();
+    }
+
+    // Update galaxy background to always face camera while maintaining rotation
+    if (this.galaxyPlane) {
+      // Keep galaxy plane at a fixed distance from camera
+      const galaxyDistance = 1800; // Reduced to avoid z-fighting with stars
+      const forwardDirection = new THREE.Vector3(0, 0, -1);
+
+      // Apply camera's rotation to the forward direction
+      forwardDirection.applyQuaternion(this.camera.quaternion);
+
+      // Position galaxy plane in front of the camera
+      this.galaxyPlane.position.copy(this.camera.position).add(
+        forwardDirection.multiplyScalar(galaxyDistance)
+      );
+
+      // Make galaxy plane face the camera (perpendicular to camera's forward direction)
+      this.galaxyPlane.lookAt(this.camera.position);
+    }
+
     // Optional: Add subtle camera sway for more organic movement
     const time = this.lastUpdateTime * 0.5;
     const sway = Math.sin(time) * 0.5;
@@ -85,9 +168,10 @@ export class StarfieldManager {
     this.camera.position.x += sway * deltaTime;
     this.camera.position.y += bob * deltaTime;
 
-    // Update camera target (looking forward)
-    const lookTarget = this.camera.position.clone().add(new THREE.Vector3(0, 0, -100));
-    this.camera.lookAt(lookTarget);
+    // Update matrix after position changes
+    if (this.camera instanceof THREE.PerspectiveCamera) {
+      this.camera.updateMatrix();
+    }
   }
 
   private manageStarLifecycle(): void {
@@ -128,6 +212,15 @@ export class StarfieldManager {
   // Cleanup
   dispose(): void {
     this.particleSystem.dispose();
+
+    if (this.galaxyPlane) {
+      this.scene.remove(this.galaxyPlane);
+      this.galaxyPlane.geometry.dispose();
+      if (this.galaxyPlane.material instanceof THREE.Material) {
+        this.galaxyPlane.material.dispose();
+      }
+      this.galaxyPlane = null;
+    }
   }
 
   // Getters for debugging/monitoring

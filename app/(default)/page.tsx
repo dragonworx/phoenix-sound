@@ -11,9 +11,9 @@ export default function HomePage() {
   const onInit = useCallback((renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => {
     starfieldScene(renderer, scene, camera, {
       distributionType: 'galaxy',
-      maxStars: 500,
-      speed: 30,
-      cameraSpeed: 25
+      maxStars: 800,
+      speed: 40,
+      cameraSpeed: 35
     });
   }, []);
 
@@ -32,7 +32,8 @@ export default function HomePage() {
             type: 'perspective',
             position: [0, 0, 0],
             lookAt: [0, 0, -100],
-            fov: 60
+            fov: 75,
+            far: 2000
           }}
           background="transparent"
           alpha={true}
