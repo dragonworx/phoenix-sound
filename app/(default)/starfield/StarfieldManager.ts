@@ -3,6 +3,10 @@ import { StarfieldConfig } from './StarfieldConfig';
 import { StarfieldParticleSystem, StarfieldParticle } from './StarfieldParticle';
 import { StarfieldDistribution } from './StarfieldDistribution';
 
+export const starTextures = [
+  '/img/stars/logo.png',
+]
+
 export class StarfieldManager {
   private particleSystem: StarfieldParticleSystem;
   private config: StarfieldConfig;
@@ -39,7 +43,7 @@ export class StarfieldManager {
   private createGalaxyBackground(): void {
     // Load galaxy texture
     const textureLoader = new THREE.TextureLoader();
-    const galaxyTexture = textureLoader.load('/galaxy.jpg');
+    const galaxyTexture = textureLoader.load('/img/galaxy.png');
 
     // Calculate plane size based on camera FOV and distance to ensure edges are occluded
     const distance = 1800; // Place galaxy far away but within camera range, reduced to avoid z-fighting
