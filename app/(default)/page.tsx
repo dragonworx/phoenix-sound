@@ -5,10 +5,21 @@ import * as THREE from 'three';
 import Header from "./components/server/Header";
 import Footer from "./components/server/Footer";
 import ThreeRenderer from "./components/client/ThreeRenderer";
-import { customScene } from './scene';
+import { starfieldScene, updateStarfieldScene } from './starfieldScene';
 
 export default function HomePage() {
-  const onInit = useCallback(customScene, []);
+  const onInit = useCallback((renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => {
+    starfieldScene(renderer, scene, camera, {
+      distributionType: 'galaxy',
+      maxStars: 500,
+      speed: 30,
+      cameraSpeed: 25
+    });
+  }, []);
+
+  const onUpdate = useCallback((deltaTime: number, elapsedTime: number) => {
+    updateStarfieldScene(deltaTime, elapsedTime);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
@@ -19,15 +30,14 @@ export default function HomePage() {
           sizing={{ mode: 'auto-fill' }}
           camera={{
             type: 'perspective',
-            position: [100, 100, 100],
-            lookAt: [0, 0, 0],
-            fov: 45
+            position: [0, 0, 0],
+            lookAt: [0, 0, -100],
+            fov: 60
           }}
-          shadowMapEnabled={true}
-          shadowMapType={THREE.PCFSoftShadowMap}
           background="transparent"
           alpha={true}
           onInit={onInit}
+          onUpdate={onUpdate}
         />
       </main>
 
