@@ -5,6 +5,10 @@ import { StarfieldDistribution } from './StarfieldDistribution';
 
 export const starTextures = [
   '/img/stars/logo.png',
+  '/img/stars/galaxy-1.jpg',
+  '/img/stars/galaxy-2.jpg',
+  '/img/stars/galaxy-3.jpg',
+  '/img/stars/galaxy-4.jpg',
 ]
 
 export class StarfieldManager {

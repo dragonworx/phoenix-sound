@@ -90,20 +90,27 @@ export class StarfieldParticleSystem {
     if (starTextures.length === 0) return;
 
     const textureLoader = new THREE.TextureLoader();
+    let loadedCount = 0;
 
-    // For now, just use the first texture as a simple approach
-    textureLoader.load(starTextures[0], (texture) => {
-      texture.generateMipmaps = false;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
+    // Load all textures
+    starTextures.forEach((texturePath, index) => {
+      textureLoader.load(texturePath, (texture) => {
+        texture.generateMipmaps = false;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
 
-      // Update material with the loaded texture
-      if (this.material && this.material.uniforms) {
-        this.material.uniforms.uTexture.value = texture;
-        this.material.needsUpdate = true;
-      }
+        this.textures[index] = texture;
+        loadedCount++;
+
+        // Update material uniforms when all textures are loaded
+        if (loadedCount === starTextures.length && this.material && this.material.uniforms) {
+          this.material.uniforms.uTextures.value = this.textures;
+          this.material.uniforms.uTextureCount.value = this.textures.length;
+          this.material.needsUpdate = true;
+        }
+      });
     });
   }
 
@@ -129,28 +136,50 @@ export class StarfieldParticleSystem {
       depthWrite: false,
       depthTest: true,
       uniforms: {
-        uTexture: { value: defaultTexture }
+        uTextures: { value: [defaultTexture] },
+        uTextureCount: { value: 1 }
       },
       vertexShader: `
+        attribute float textureIndex;
         varying vec2 vUv;
         varying vec3 vColor;
+        varying float vTextureIndex;
 
         void main() {
           vUv = uv;
           vColor = instanceColor;
+          vTextureIndex = textureIndex;
 
           vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
-        uniform sampler2D uTexture;
+        uniform sampler2D uTextures[5];
+        uniform int uTextureCount;
 
         varying vec2 vUv;
         varying vec3 vColor;
+        varying float vTextureIndex;
 
         void main() {
-          vec4 textureColor = texture2D(uTexture, vUv);
+          vec4 textureColor = vec4(1.0);
+
+          int texIndex = int(floor(vTextureIndex + 0.5));
+
+          if (texIndex == 0) {
+            textureColor = texture2D(uTextures[0], vUv);
+          } else if (texIndex == 1 && uTextureCount > 1) {
+            textureColor = texture2D(uTextures[1], vUv);
+          } else if (texIndex == 2 && uTextureCount > 2) {
+            textureColor = texture2D(uTextures[2], vUv);
+          } else if (texIndex == 3 && uTextureCount > 3) {
+            textureColor = texture2D(uTextures[3], vUv);
+          } else if (texIndex == 4 && uTextureCount > 4) {
+            textureColor = texture2D(uTextures[4], vUv);
+          } else {
+            textureColor = texture2D(uTextures[0], vUv);
+          }
 
           // Apply color tint and preserve alpha from texture
           gl_FragColor = vec4(vColor * textureColor.rgb, textureColor.a);
@@ -172,6 +201,16 @@ export class StarfieldParticleSystem {
     this.instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(
       new Float32Array(this.config.maxStars * 3),
       3
+    );
+
+    // Initialize texture index attribute
+    const textureIndices = new Float32Array(this.config.maxStars);
+    for (let i = 0; i < this.config.maxStars; i++) {
+      textureIndices[i] = 0; // Default to first texture
+    }
+    this.instancedMesh.geometry.setAttribute(
+      'textureIndex',
+      new THREE.InstancedBufferAttribute(textureIndices, 1)
     );
 
     scene.add(this.instancedMesh);
@@ -221,6 +260,12 @@ export class StarfieldParticleSystem {
     if (this.instancedMesh.instanceColor) {
       this.instancedMesh.instanceColor.needsUpdate = true;
     }
+
+    // Update texture index attribute
+    const textureIndexAttribute = this.instancedMesh.geometry.getAttribute('textureIndex') as THREE.InstancedBufferAttribute;
+    if (textureIndexAttribute) {
+      textureIndexAttribute.needsUpdate = true;
+    }
   }
 
   private updateInstanceMatrix(index: number, particle: StarfieldParticle, camera: THREE.Camera): void {
@@ -236,6 +281,12 @@ export class StarfieldParticleSystem {
     // Set color
     if (this.instancedMesh.instanceColor) {
       this.instancedMesh.instanceColor.setXYZ(index, particle.color.r, particle.color.g, particle.color.b);
+    }
+
+    // Set texture index
+    const textureIndexAttribute = this.instancedMesh.geometry.getAttribute('textureIndex') as THREE.InstancedBufferAttribute;
+    if (textureIndexAttribute) {
+      textureIndexAttribute.setX(index, particle.textureIndex);
     }
   }
 
