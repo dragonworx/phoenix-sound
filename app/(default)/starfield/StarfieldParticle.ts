@@ -95,6 +95,8 @@ export class StarfieldParticleSystem {
     // Load all textures
     starTextures.forEach((texturePath, index) => {
       textureLoader.load(texturePath, (texture) => {
+        // Disable sRGB color space to prevent gamma correction brightening
+        texture.colorSpace = THREE.LinearSRGBColorSpace;
         texture.generateMipmaps = false;
         texture.wrapS = THREE.ClampToEdgeWrapping;
         texture.wrapT = THREE.ClampToEdgeWrapping;
@@ -130,9 +132,21 @@ export class StarfieldParticleSystem {
     }
     const defaultTexture = new THREE.CanvasTexture(canvas);
 
+    // Convert blend mode string to Three.js constant
+    const getBlendMode = (mode: string): THREE.Blending => {
+      switch (mode) {
+        case 'additive': return THREE.AdditiveBlending;
+        case 'normal': return THREE.NormalBlending;
+        case 'multiply': return THREE.MultiplyBlending;
+        case 'screen': return THREE.AdditiveBlending; // Screen approximation
+        case 'subtract': return THREE.SubtractiveBlending;
+        default: return THREE.AdditiveBlending;
+      }
+    };
+
     this.material = new THREE.ShaderMaterial({
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: getBlendMode(this.config.blendMode || 'additive'),
       depthWrite: false,
       depthTest: true,
       uniforms: {
@@ -181,8 +195,8 @@ export class StarfieldParticleSystem {
             textureColor = texture2D(uTextures[0], vUv);
           }
 
-          // Apply color tint and preserve alpha from texture
-          gl_FragColor = vec4(vColor * textureColor.rgb, textureColor.a);
+          // Preserve original texture colors and alpha transparency
+          gl_FragColor = vec4(textureColor.rgb, textureColor.a);
         }
       `
     });

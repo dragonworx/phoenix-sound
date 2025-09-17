@@ -12,8 +12,13 @@ export default function HomePage() {
     starfieldScene(renderer, scene, camera, {
       distributionType: 'galaxy',
       maxStars: 800,
-      speed: 40,
-      cameraSpeed: 35
+      speed: 1,
+      cameraSpeed: 20,
+      drift: true,
+      driftSpeed: 1.5,
+      minDriftDuration: 10.0,
+      maxDriftDuration: 20.0,
+      blendMode: 'normal'
     });
   }, []);
 
@@ -35,8 +40,16 @@ export default function HomePage() {
             fov: 75,
             far: 2000
           }}
-          background="transparent"
+          background="black"
           alpha={true}
+          afterimage={{
+            enabled: true,
+            oscillation: {
+              min: 0.85,
+              max: 0.98,
+              speed: 0.5
+            }
+          }}
           onInit={onInit}
           onUpdate={onUpdate}
         />

@@ -146,9 +146,8 @@ export class StarfieldDistribution {
   }
 
   static generateStarColor(config: StarfieldConfig): number {
-    // Select random color from the palette
-    const colorIndex = Math.floor(Math.random() * config.colors.length);
-    return config.colors[colorIndex];
+    // Use white color to preserve source texture colors and alpha transparency
+    return 0xffffff;
   }
 
   static generateStarSize(config: StarfieldConfig): number {

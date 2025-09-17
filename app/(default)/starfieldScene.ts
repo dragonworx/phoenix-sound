@@ -4,7 +4,6 @@ import { StarfieldConfig, DEFAULT_STARFIELD_CONFIG } from './starfield/Starfield
 
 // Global state for the starfield system
 let starfieldManager: StarfieldManager | null = null;
-let pointLight: THREE.PointLight | null = null;
 let lastTime: number = 0;
 
 /**
@@ -23,9 +22,6 @@ export const starfieldScene = (
   // Set up scene background and fog
   setupSceneEnvironment(scene, finalConfig);
 
-  // Initialize lighting
-  setupLighting(scene, camera, finalConfig);
-
   // Initialize starfield manager
   starfieldManager = new StarfieldManager(finalConfig, scene, camera);
 
@@ -39,15 +35,10 @@ export const starfieldScene = (
  * Update function to be called each frame
  */
 export const updateStarfieldScene = (deltaTime: number, elapsedTime: number): void => {
-  if (!starfieldManager || !pointLight) return;
+  if (!starfieldManager) return;
 
   // Update starfield system
   starfieldManager.update(deltaTime);
-
-  // Update point light to follow camera
-  const cameraPos = starfieldManager.getCameraPosition();
-  pointLight.position.copy(cameraPos);
-  pointLight.position.z -= 10; // Position light slightly in front of camera
 
   lastTime = elapsedTime;
 };
@@ -67,24 +58,6 @@ function setupSceneEnvironment(scene: THREE.Scene, config: StarfieldConfig): voi
   );
 }
 
-/**
- * Setup lighting system
- */
-function setupLighting(scene: THREE.Scene, camera: THREE.Camera, config: StarfieldConfig): void {
-  // Point light that follows the camera to illuminate nearby stars
-  pointLight = new THREE.PointLight(
-    0xffffff,
-    config.lightIntensity,
-    config.lightDistance
-  );
-  pointLight.position.copy(camera.position);
-  pointLight.position.z -= 10;
-  scene.add(pointLight);
-
-  // Subtle ambient light to ensure some visibility of distant stars
-  const ambientLight = new THREE.AmbientLight(0x111133, 0.1);
-  scene.add(ambientLight);
-}
 
 /**
  * Setup initial camera configuration
@@ -147,5 +120,4 @@ export const disposeStarfieldScene = (): void => {
     starfieldManager.dispose();
     starfieldManager = null;
   }
-  pointLight = null;
 };

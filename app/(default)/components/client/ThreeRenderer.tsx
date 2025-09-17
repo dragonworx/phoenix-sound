@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 interface BaseCameraConfig {
   position?: [number, number, number];
@@ -39,6 +43,16 @@ interface SizingFixed {
 
 type SizingConfig = SizingAuto | SizingFixed;
 
+interface AfterimageConfig {
+  enabled?: boolean;
+  damp?: number;
+  oscillation?: {
+    min: number;
+    max: number;
+    speed: number;
+  };
+}
+
 interface ThreeRendererProps {
   scene?: THREE.Scene;
   sizing: SizingConfig;
@@ -50,6 +64,7 @@ interface ThreeRendererProps {
   shadowMapEnabled?: boolean;
   shadowMapType?: THREE.ShadowMapType;
   pixelRatio?: number;
+  afterimage?: AfterimageConfig;
   onInit?: (renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => void;
   onUpdate?: (deltaTime: number, elapsedTime: number) => void;
   onResize?: (width: number, height: number) => void;
@@ -66,6 +81,7 @@ export default function ThreeRenderer({
   shadowMapEnabled = false,
   shadowMapType = THREE.PCFSoftShadowMap,
   pixelRatio,
+  afterimage,
   onInit,
   onUpdate,
   onResize
@@ -74,6 +90,8 @@ export default function ThreeRenderer({
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.Camera | null>(null);
+  const composerRef = useRef<EffectComposer | null>(null);
+  const afterimagePassRef = useRef<AfterimagePass | null>(null);
   const animationIdRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -140,6 +158,7 @@ export default function ThreeRenderer({
     }
 
     rendererRef.current.setSize(width, height);
+    composerRef.current?.setSize(width, height);
 
     if (cameraRef.current instanceof THREE.PerspectiveCamera) {
       cameraRef.current.aspect = width / height;
@@ -161,19 +180,39 @@ export default function ThreeRenderer({
     if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
 
     const currentTime = performance.now();
-    const deltaTime = (currentTime - lastTimeRef.current) / 1000;
     const elapsedTime = currentTime / 1000;
 
     const targetFrameTime = 1000 / frameRate;
 
     if (currentTime - lastTimeRef.current >= targetFrameTime) {
+      // Calculate deltaTime based on target frame rate, not actual frame time
+      const deltaTime = targetFrameTime / 1000;
       onUpdate?.(deltaTime, elapsedTime);
-      rendererRef.current.render(sceneRef.current, cameraRef.current);
+
+      if (afterimagePassRef.current && afterimage) {
+        afterimagePassRef.current.enabled = afterimage.enabled ?? true;
+
+        // Handle oscillation or static damp value
+        if (afterimage.oscillation) {
+          const { min, max, speed } = afterimage.oscillation;
+          const oscillationValue = Math.sin(elapsedTime * speed) * 0.5 + 0.5; // Normalize to 0-1
+          afterimagePassRef.current.damp = min + (max - min) * oscillationValue;
+        } else if (afterimage.damp !== undefined) {
+          afterimagePassRef.current.damp = afterimage.damp;
+        }
+      }
+
+      if (composerRef.current) {
+        composerRef.current.render();
+      } else {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
+
       lastTimeRef.current = currentTime;
     }
 
     animationIdRef.current = requestAnimationFrame(animate);
-  }, [frameRate, onUpdate]);
+  }, [frameRate, onUpdate, afterimage?.enabled]);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
@@ -198,6 +237,11 @@ export default function ThreeRenderer({
     renderer.setSize(width, height);
     renderer.setPixelRatio(pixelRatio ?? window.devicePixelRatio);
 
+    // Disable tone mapping and color management to preserve original texture colors
+    renderer.toneMapping = THREE.NoToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace; // Prevent sRGB conversion
+
     if (shadowMapEnabled) {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = shadowMapType;
@@ -218,6 +262,25 @@ export default function ThreeRenderer({
 
     onInit?.(renderer, scene, camera);
 
+    // Setup postprocessing if afterimage is enabled
+    if (afterimage) {
+      const composer = new EffectComposer(renderer);
+
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      const afterimagePass = new AfterimagePass();
+      afterimagePass.damp = afterimage.damp ?? 0.96;
+      composer.addPass(afterimagePass);
+
+      const outputPass = new OutputPass();
+      outputPass.toneMapping = THREE.NoToneMapping; // Disable tone mapping to preserve original colors
+      composer.addPass(outputPass);
+
+      composerRef.current = composer;
+      afterimagePassRef.current = afterimagePass;
+    }
+
     lastTimeRef.current = performance.now();
     animate();
 
@@ -225,9 +288,10 @@ export default function ThreeRenderer({
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
       }
+      composerRef.current?.dispose();
       renderer.dispose();
     };
-  }, [externalScene, createCamera, antialias, alpha, shadowMapEnabled, shadowMapType, pixelRatio, background, sizing, onInit, animate]);
+  }, [externalScene, createCamera, antialias, alpha, shadowMapEnabled, shadowMapType, pixelRatio, background, sizing, afterimage, onInit, animate]);
 
   useEffect(() => {
     if (sizing.mode === 'auto-fill') {

@@ -4,11 +4,11 @@ import { StarfieldParticleSystem, StarfieldParticle } from './StarfieldParticle'
 import { StarfieldDistribution } from './StarfieldDistribution';
 
 export const starTextures = [
-  '/img/stars/logo.png',
-  '/img/stars/galaxy-1.jpg',
-  '/img/stars/galaxy-2.jpg',
-  '/img/stars/galaxy-3.jpg',
-  '/img/stars/galaxy-4.jpg',
+  // '/img/stars/galaxy-1.png',
+  // '/img/stars/galaxy-2.png',
+  // '/img/stars/galaxy-3.png',
+  // '/img/stars/galaxy-4.png',
+  '/img/stars/flare-2.png',
 ]
 
 export class StarfieldManager {
@@ -24,6 +24,25 @@ export class StarfieldManager {
   private rotationSpeed: number = 0.1; // radians per second
   private galaxyPlane: THREE.Mesh | null = null;
 
+  // Drift state for camera rotation
+  private driftState: {
+    enabled: boolean;
+    currentRotation: number;
+    startRotation: number;
+    targetRotation: number;
+    transitionTime: number;
+    transitionDuration: number;
+    isTransitioning: boolean;
+  } = {
+    enabled: false,
+    currentRotation: 0,
+    startRotation: 0,
+    targetRotation: 0,
+    transitionTime: 0,
+    transitionDuration: 2.0,
+    isTransitioning: false
+  };
+
   constructor(config: StarfieldConfig, scene: THREE.Scene, camera: THREE.Camera) {
     this.config = config;
     this.scene = scene;
@@ -37,6 +56,12 @@ export class StarfieldManager {
     // Start camera movement - move forward in negative Z direction (towards where camera is looking)
     this.cameraVelocity.set(0, 0, -this.config.cameraSpeed);
 
+    // Initialize drift system if enabled
+    if (this.config.drift) {
+      this.driftState.enabled = true;
+      this.generateNewDriftTarget();
+    }
+
     // Create galaxy background
     this.createGalaxyBackground();
 
@@ -48,6 +73,14 @@ export class StarfieldManager {
     // Load galaxy texture
     const textureLoader = new THREE.TextureLoader();
     const galaxyTexture = textureLoader.load('/img/galaxy.png');
+
+    // Disable sRGB color space to prevent gamma correction brightening
+    galaxyTexture.colorSpace = THREE.LinearSRGBColorSpace;
+    galaxyTexture.generateMipmaps = false;
+    galaxyTexture.wrapS = THREE.ClampToEdgeWrapping;
+    galaxyTexture.wrapT = THREE.ClampToEdgeWrapping;
+    galaxyTexture.minFilter = THREE.LinearFilter;
+    galaxyTexture.magFilter = THREE.LinearFilter;
 
     // Calculate plane size based on camera FOV and distance to ensure edges are occluded
     const distance = 1800; // Place galaxy far away but within camera range, reduced to avoid z-fighting
@@ -67,8 +100,8 @@ export class StarfieldManager {
       map: galaxyTexture,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.9,
-      color: 0xffffff,
+      opacity: 1.0, // Full opacity to preserve original image contrast
+      // Remove color tint to preserve original image colors
       fog: false, // Don't apply fog to galaxy
       depthWrite: false // Don't write to depth buffer so stars can render in front
     });
@@ -135,19 +168,24 @@ export class StarfieldManager {
     const movement = this.cameraVelocity.clone().multiplyScalar(deltaTime);
     this.camera.position.add(movement);
 
-    // Rotate camera around Z-axis (roll rotation)
-    const rotationAmount = this.rotationSpeed * deltaTime;
+    // Handle drift rotation if enabled
+    if (this.driftState.enabled) {
+      this.updateDriftRotation(deltaTime);
+    } else {
+      // Default rotation behavior
+      const rotationAmount = this.rotationSpeed * deltaTime;
 
-    if (this.camera instanceof THREE.PerspectiveCamera) {
-      // Create rotation quaternion for Z-axis rotation
-      const rotationQuaternion = new THREE.Quaternion();
-      rotationQuaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotationAmount);
+      if (this.camera instanceof THREE.PerspectiveCamera) {
+        // Create rotation quaternion for Z-axis rotation
+        const rotationQuaternion = new THREE.Quaternion();
+        rotationQuaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotationAmount);
 
-      // Apply rotation to camera's quaternion
-      this.camera.quaternion.multiplyQuaternions(rotationQuaternion, this.camera.quaternion);
+        // Apply rotation to camera's quaternion
+        this.camera.quaternion.multiplyQuaternions(rotationQuaternion, this.camera.quaternion);
 
-      // Update the camera matrix
-      this.camera.updateMatrix();
+        // Update the camera matrix
+        this.camera.updateMatrix();
+      }
     }
 
     // Update galaxy background to always face camera while maintaining rotation
@@ -200,6 +238,81 @@ export class StarfieldManager {
       for (let i = 0; i < starsToSpawn; i++) {
         this.spawnStar();
       }
+    }
+  }
+
+  private generateNewDriftTarget(): void {
+    // Store current rotation as the starting point for the new transition
+    this.driftState.startRotation = this.driftState.currentRotation;
+
+    // Generate random rotation target between -45 to +45 degrees, scaled by driftSpeed
+    const maxRotation = Math.PI / 4; // 45 degrees in radians
+    const baseRotation = (Math.random() - 0.5) * 2 * maxRotation;
+    this.driftState.targetRotation = baseRotation * (this.config.driftSpeed || 1.0);
+
+    // Reset transition state
+    this.driftState.transitionTime = 0;
+
+    // Use configurable min/max duration
+    const minDuration = this.config.minDriftDuration || 10.0;
+    const maxDuration = this.config.maxDriftDuration || 20.0;
+    this.driftState.transitionDuration = minDuration + Math.random() * (maxDuration - minDuration);
+
+    console.log(`New drift target: ${(this.driftState.targetRotation * 180 / Math.PI).toFixed(1)}°, duration: ${this.driftState.transitionDuration.toFixed(1)}s`);
+
+    this.driftState.isTransitioning = true;
+  }
+
+  private updateDriftRotation(deltaTime: number): void {
+    if (!this.driftState.isTransitioning) {
+      // Generate new target if not currently transitioning
+      this.generateNewDriftTarget();
+      return;
+    }
+
+    // Update transition time (driftSpeed doesn't affect timing, only rotation amount)
+    this.driftState.transitionTime += deltaTime;
+
+    // Debug: Log deltaTime and progress occasionally
+    if (Math.random() < 0.01) { // Log roughly 1% of frames
+      console.log(`deltaTime: ${deltaTime.toFixed(4)}s, progress: ${(this.driftState.transitionTime / this.driftState.transitionDuration * 100).toFixed(1)}%`);
+    }
+
+    // Calculate transition progress (0 to 1)
+    const progress = Math.min(this.driftState.transitionTime / this.driftState.transitionDuration, 1.0);
+
+    // Use smooth ease-in-out curve for natural motion
+    const easedProgress = progress < 0.5
+      ? 2 * progress * progress
+      : 1 - 2 * (1 - progress) * (1 - progress);
+
+    // Interpolate between start and target rotation over the full duration
+    const previousRotation = this.driftState.currentRotation;
+    this.driftState.currentRotation = this.driftState.startRotation +
+      (this.driftState.targetRotation - this.driftState.startRotation) * easedProgress;
+
+    // Apply rotation to camera
+    if (this.camera instanceof THREE.PerspectiveCamera) {
+      // Calculate rotation delta for this frame
+      const rotationDelta = this.driftState.currentRotation - previousRotation;
+
+      // Create rotation quaternion for Z-axis rotation
+      const rotationQuaternion = new THREE.Quaternion();
+      rotationQuaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta);
+
+      // Apply rotation to camera's quaternion
+      this.camera.quaternion.multiplyQuaternions(rotationQuaternion, this.camera.quaternion);
+
+      // Update the camera matrix
+      this.camera.updateMatrix();
+    }
+
+    // Check if transition is complete
+    if (progress >= 1.0) {
+      console.log(`Drift completed in ${this.driftState.transitionTime.toFixed(1)}s (expected: ${this.driftState.transitionDuration.toFixed(1)}s)`);
+      // Complete the current transition and immediately start next one for smooth flow
+      this.driftState.currentRotation = this.driftState.targetRotation;
+      this.generateNewDriftTarget();
     }
   }
 

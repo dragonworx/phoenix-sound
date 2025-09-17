@@ -5,6 +5,10 @@ export interface StarfieldConfig {
   speed: number;
   spinSpeed: number;
   cameraSpeed: number;
+  drift?: boolean;
+  driftSpeed?: number;
+  minDriftDuration?: number;
+  maxDriftDuration?: number;
 
   // Star properties
   maxStars: number;
@@ -25,6 +29,7 @@ export interface StarfieldConfig {
   fogFar: number;
   lightIntensity: number;
   lightDistance: number;
+  blendMode?: 'additive' | 'normal' | 'multiply' | 'screen' | 'subtract';
 
   // Performance
   instanceBatchSize: number;
@@ -36,9 +41,13 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   speed: 50,
   spinSpeed: 0.001,
   cameraSpeed: 20,
+  drift: false,
+  driftSpeed: 1.0,
+  minDriftDuration: 10.0,
+  maxDriftDuration: 20.0,
 
   // Star properties
-  maxStars: 800, // Increased for denser starfield
+  maxStars: 2000, // Increased for denser starfield
   starSizeMin: 0.5,
   starSizeMax: 4.0, // Slightly larger max size for better visibility
   cullingDistance: 350, // Reduced to prevent z-fighting with galaxy background
@@ -47,7 +56,7 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   // Distribution algorithm
   distributionType: 'galaxy',
   distributionRadius: 300, // Increased for wider star field coverage
-  distributionDensity: 0.8,
+  distributionDensity: 1,
 
   // Visual effects
   colors: [0xffffff, 0xffffcc, 0xccccff, 0xffcccc, 0xccffcc, 0xffccff],
@@ -56,6 +65,7 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   fogFar: 350, // Reduced to match culling distance
   lightIntensity: 2,
   lightDistance: 100,
+  blendMode: 'additive',
 
   // Performance
   instanceBatchSize: 100,
