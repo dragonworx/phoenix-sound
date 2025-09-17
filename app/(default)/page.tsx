@@ -10,15 +10,15 @@ import { starfieldScene, updateStarfieldScene } from './starfieldScene';
 export default function HomePage() {
   const onInit = useCallback((renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => {
     starfieldScene(renderer, scene, camera, {
-      distributionType: 'galaxy',
+      distributionType: 'radial',
       maxStars: 800,
       speed: 1,
       cameraSpeed: 20,
       drift: true,
       driftSpeed: 1.5,
-      minDriftDuration: 10.0,
-      maxDriftDuration: 20.0,
-      blendMode: 'normal'
+      minDriftDuration: 3.0,
+      maxDriftDuration: 10.0,
+      blendMode: 'additive'
     });
   }, []);
 
@@ -37,7 +37,7 @@ export default function HomePage() {
             type: 'perspective',
             position: [0, 0, 0],
             lookAt: [0, 0, -100],
-            fov: 75,
+            fov: 90,
             far: 2000
           }}
           background="black"
@@ -45,8 +45,8 @@ export default function HomePage() {
           afterimage={{
             enabled: true,
             oscillation: {
-              min: 0.85,
-              max: 0.98,
+              min: 0.2,
+              max: 0.8,
               speed: 0.5
             }
           }}

@@ -49,6 +49,9 @@ export class StarfieldManager {
     this.camera = camera;
     this.particleSystem = new StarfieldParticleSystem(config, scene);
 
+    // Set camera reference for viewport-aware star distribution
+    StarfieldDistribution.setCamera(camera);
+
     this.initializeStarfield();
   }
 
@@ -322,7 +325,7 @@ export class StarfieldManager {
     this.cameraVelocity.z = -speed; // Move forward in negative Z direction
   }
 
-  setDistributionType(type: 'galaxy' | 'nebula' | 'cluster' | 'uniform'): void {
+  setDistributionType(type: 'galaxy' | 'nebula' | 'cluster' | 'uniform' | 'radial'): void {
     this.config.distributionType = type;
   }
 

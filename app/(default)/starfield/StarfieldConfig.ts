@@ -18,7 +18,7 @@ export interface StarfieldConfig {
   spawnDistance: number;
 
   // Distribution algorithm
-  distributionType: 'galaxy' | 'nebula' | 'cluster' | 'uniform';
+  distributionType: 'galaxy' | 'nebula' | 'cluster' | 'uniform' | 'radial';
   distributionRadius: number;
   distributionDensity: number;
 
@@ -47,7 +47,7 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   maxDriftDuration: 20.0,
 
   // Star properties
-  maxStars: 2000, // Increased for denser starfield
+  maxStars: 500, // Increased for denser starfield
   starSizeMin: 0.5,
   starSizeMax: 4.0, // Slightly larger max size for better visibility
   cullingDistance: 350, // Reduced to prevent z-fighting with galaxy background

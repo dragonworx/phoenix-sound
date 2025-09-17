@@ -71,9 +71,9 @@ function setupCamera(camera: THREE.Camera): void {
   camera.lookAt(lookTarget);
 
   if (camera instanceof THREE.PerspectiveCamera) {
-    // Optimize FOV for space travel experience
-    camera.fov = 60;
-    camera.updateProjectionMatrix();
+    // Don't override FOV - use what's configured in the ThreeRenderer
+    // camera.fov = 60; // Removed to preserve configured FOV
+    // camera.updateProjectionMatrix(); // Not needed since we're not changing FOV
 
     // Enable manual matrix updates for rotation
     camera.matrixAutoUpdate = false;
@@ -91,7 +91,7 @@ export const starfieldUtils = {
     }
   },
 
-  setDistribution: (type: 'galaxy' | 'nebula' | 'cluster' | 'uniform') => {
+  setDistribution: (type: 'galaxy' | 'nebula' | 'cluster' | 'uniform' | 'radial') => {
     if (starfieldManager) {
       starfieldManager.setDistributionType(type);
     }
