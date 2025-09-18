@@ -13,6 +13,14 @@
     "docker:fresh": "bun run docker:clean && bun run docker:dev",
     "docker:build": "docker-compose build web-prod",
     "docker:prod": "docker-compose up web-prod",
+    "docker:db": "docker-compose up postgres pgadmin",
+    "docker:full": "docker-compose up",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "db:seed": "node scripts/seed-admin.js",
+    "db:seed:password": "node scripts/seed-admin.js --password",
+    "pgadmin": "echo '🔗 pgAdmin: http://localhost:5050' && echo '📧 Email: admin@phoenixsound.com' && echo '🔑 Password: admin_password'",
+    "admin": "echo '🔗 Admin Panel: http://localhost:3000/admin/login'",
     "kill3000": "lsof -ti :3000 | xargs -r kill -9 2>/dev/null || echo 'Port 3000 is free'"
   },
   "devDependencies": {
@@ -23,10 +31,16 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.15.5",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/three": "^0.180.0",
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
     "next": "^15.5.2",
+    "pg": "^8.16.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "three": "^0.180.0"

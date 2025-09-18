@@ -46,7 +46,7 @@ export default function HomePage() {
             enabled: true,
             oscillation: {
               min: 0.5,
-              max: 0.8,
+              max: 0.9,
               speed: 0.5
             }
           }}
