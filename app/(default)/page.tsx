@@ -15,7 +15,7 @@ export default function HomePage() {
       speed: 1,
       cameraSpeed: 20,
       drift: true,
-      driftSpeed: 1.5,
+      driftSpeed: 0.5,
       minDriftDuration: 3.0,
       maxDriftDuration: 10.0,
       blendMode: 'additive'
@@ -45,7 +45,7 @@ export default function HomePage() {
           afterimage={{
             enabled: true,
             oscillation: {
-              min: 0.2,
+              min: 0.5,
               max: 0.8,
               speed: 0.5
             }
