@@ -1,6 +1,68 @@
 import * as THREE from 'three';
 
+// Camera configuration interfaces
+interface BaseCameraConfig {
+  position?: [number, number, number];
+  lookAt?: [number, number, number];
+}
+
+interface PerspectiveCameraConfig extends BaseCameraConfig {
+  type: 'perspective';
+  fov?: number;
+  near?: number;
+  far?: number;
+}
+
+interface OrthographicCameraConfig extends BaseCameraConfig {
+  type: 'orthographic';
+  left?: number;
+  right?: number;
+  top?: number;
+  bottom?: number;
+  near?: number;
+  far?: number;
+}
+
+export type CameraConfig = PerspectiveCameraConfig | OrthographicCameraConfig;
+
+// Sizing configuration interfaces
+interface SizingAuto {
+  mode: 'auto-fill';
+}
+
+interface SizingFixed {
+  mode: 'fixed';
+  width: number;
+  height: number;
+}
+
+export type SizingConfig = SizingAuto | SizingFixed;
+
+// Afterimage effect configuration
+export interface AfterimageConfig {
+  enabled?: boolean;
+  damp?: number;
+  oscillation?: {
+    min: number;
+    max: number;
+    speed: number;
+  };
+}
+
+// Unified configuration interface combining all renderer and starfield settings
 export interface StarfieldConfig {
+  // Renderer settings
+  sizing: SizingConfig;
+  camera: CameraConfig;
+  frameRate?: number;
+  background?: string | 'transparent';
+  antialias?: boolean;
+  alpha?: boolean;
+  shadowMapEnabled?: boolean;
+  shadowMapType?: THREE.ShadowMapType;
+  pixelRatio?: number;
+  afterimage?: AfterimageConfig;
+
   // Movement and speed
   speed: number;
   spinSpeed: number;
@@ -31,12 +93,48 @@ export interface StarfieldConfig {
   lightDistance: number;
   blendMode?: 'additive' | 'normal' | 'multiply' | 'screen' | 'subtract';
 
+  // Phoenix sprite settings
+  phoenixPulse?: boolean;
+  phoenixPulseSpeed?: number;
+  phoenixPulseAmplitude?: number;
+  phoenixBloom?: boolean;
+  phoenixBloomStrength?: number;
+  phoenixBloomOscillate?: boolean;
+  phoenixBloomOscillateSpeed?: number;
+  phoenixBloomMin?: number;
+  phoenixBloomMax?: number;
+
   // Performance
   instanceBatchSize: number;
   updateFrequency: number;
 }
 
 export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
+  // Renderer settings
+  sizing: { mode: 'auto-fill' },
+  camera: {
+    type: 'perspective',
+    position: [0, 0, 0],
+    lookAt: [0, 0, -100],
+    fov: 90,
+    near: 0.1,
+    far: 2000
+  },
+  frameRate: 60,
+  background: 'black',
+  antialias: true,
+  alpha: true,
+  shadowMapEnabled: false,
+  shadowMapType: THREE.PCFSoftShadowMap,
+  afterimage: {
+    enabled: true,
+    oscillation: {
+      min: 0.5,
+      max: 0.9,
+      speed: 0.1
+    }
+  },
+
   // Movement and speed
   speed: 50,
   spinSpeed: 0.001,
@@ -66,6 +164,17 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   lightIntensity: 2,
   lightDistance: 100,
   blendMode: 'additive',
+
+  // Phoenix sprite settings
+  phoenixPulse: true,
+  phoenixPulseSpeed: 0.8,
+  phoenixPulseAmplitude: 20,
+  phoenixBloom: true,
+  phoenixBloomStrength: 1.5,
+  phoenixBloomOscillate: true,
+  phoenixBloomOscillateSpeed: 0.5,
+  phoenixBloomMin: 0.8,
+  phoenixBloomMax: 2.2,
 
   // Performance
   instanceBatchSize: 100,

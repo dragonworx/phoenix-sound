@@ -6,54 +6,18 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-
-interface BaseCameraConfig {
-  position?: [number, number, number];
-  lookAt?: [number, number, number];
-}
-
-interface PerspectiveCameraConfig extends BaseCameraConfig {
-  type: 'perspective';
-  fov?: number;
-  near?: number;
-  far?: number;
-}
-
-interface OrthographicCameraConfig extends BaseCameraConfig {
-  type: 'orthographic';
-  left?: number;
-  right?: number;
-  top?: number;
-  bottom?: number;
-  near?: number;
-  far?: number;
-}
-
-type CameraConfig = PerspectiveCameraConfig | OrthographicCameraConfig;
-
-interface SizingAuto {
-  mode: 'auto-fill';
-}
-
-interface SizingFixed {
-  mode: 'fixed';
-  width: number;
-  height: number;
-}
-
-type SizingConfig = SizingAuto | SizingFixed;
-
-interface AfterimageConfig {
-  enabled?: boolean;
-  damp?: number;
-  oscillation?: {
-    min: number;
-    max: number;
-    speed: number;
-  };
-}
+import { StarfieldConfig, CameraConfig, SizingConfig, AfterimageConfig } from '../starfield/StarfieldConfig';
 
 interface ThreeRendererProps {
+  scene?: THREE.Scene;
+  config?: Partial<StarfieldConfig>;
+  onInit?: (renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => void;
+  onUpdate?: (deltaTime: number, elapsedTime: number) => void;
+  onResize?: (width: number, height: number) => void;
+}
+
+// Legacy interface for backwards compatibility if needed
+interface LegacyThreeRendererProps {
   scene?: THREE.Scene;
   sizing: SizingConfig;
   camera: CameraConfig;
@@ -72,20 +36,29 @@ interface ThreeRendererProps {
 
 export default function ThreeRenderer({
   scene: externalScene,
-  sizing,
-  camera: cameraConfig,
-  frameRate = 60,
-  background = '#000000',
-  antialias = true,
-  alpha = false,
-  shadowMapEnabled = false,
-  shadowMapType = THREE.PCFSoftShadowMap,
-  pixelRatio,
-  afterimage,
+  config = {},
   onInit,
   onUpdate,
   onResize
 }: ThreeRendererProps) {
+  // Extract renderer settings from config with defaults
+  const sizing = config.sizing ?? { mode: 'auto-fill' };
+  const cameraConfig = config.camera ?? {
+    type: 'perspective',
+    position: [0, 0, 0],
+    lookAt: [0, 0, -100],
+    fov: 75,
+    near: 0.1,
+    far: 1000
+  };
+  const frameRate = config.frameRate ?? 60;
+  const background = config.background ?? '#000000';
+  const antialias = config.antialias ?? true;
+  const alpha = config.alpha ?? false;
+  const shadowMapEnabled = config.shadowMapEnabled ?? false;
+  const shadowMapType = config.shadowMapType ?? THREE.PCFSoftShadowMap;
+  const pixelRatio = config.pixelRatio;
+  const afterimage = config.afterimage;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);

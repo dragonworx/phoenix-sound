@@ -23,6 +23,9 @@ export class StarfieldManager {
   private lastUpdateTime: number = 0;
   private rotationSpeed: number = 0.1; // radians per second
   private galaxyPlane: THREE.Mesh | null = null;
+  private phoenixSprite: THREE.Mesh | null = null;
+  private phoenixPulseTime: number = 0;
+  private phoenixBloomTime: number = 0;
 
   // Drift state for camera rotation
   private driftState: {
@@ -67,6 +70,9 @@ export class StarfieldManager {
 
     // Create galaxy background
     this.createGalaxyBackground();
+
+    // Create phoenix sprite
+    this.createPhoenixSprite();
 
     // Spawn initial stars
     this.spawnInitialStars();
@@ -123,6 +129,73 @@ export class StarfieldManager {
 
     // Add to scene
     this.scene.add(this.galaxyPlane);
+  }
+
+  private createPhoenixSprite(): void {
+    // Load phoenix texture
+    const textureLoader = new THREE.TextureLoader();
+    const phoenixTexture = textureLoader.load('/img/phoenix.png');
+
+    // Configure texture similar to galaxy background
+    phoenixTexture.colorSpace = THREE.LinearSRGBColorSpace;
+    phoenixTexture.generateMipmaps = false;
+    phoenixTexture.wrapS = THREE.ClampToEdgeWrapping;
+    phoenixTexture.wrapT = THREE.ClampToEdgeWrapping;
+    phoenixTexture.minFilter = THREE.LinearFilter;
+    phoenixTexture.magFilter = THREE.LinearFilter;
+
+    // Calculate sprite size based on viewport height (60% of window height)
+    let spriteHeight = 600 * 0.6; // Default fallback
+    let spriteWidth = spriteHeight; // Assume square aspect ratio initially
+
+    if (this.camera instanceof THREE.PerspectiveCamera) {
+      const fov = this.camera.fov * (Math.PI / 180); // Convert to radians
+      const distance = 50; // Place sprite close to camera
+      const viewportHeight = 2 * Math.tan(fov / 2) * distance;
+      spriteHeight = viewportHeight * 0.6; // 60% of viewport height
+      spriteWidth = spriteHeight; // Keep aspect ratio square for now
+    }
+
+    // Create plane geometry and unlit material with screen blend mode
+    const spriteGeometry = new THREE.PlaneGeometry(spriteWidth, spriteHeight);
+    // Choose blending mode based on config
+    let blendMode = THREE.AdditiveBlending; // Default bloom effect
+    let opacity = this.config.phoenixBloom ? this.config.phoenixBloomStrength || 1.5 : 1.0;
+
+    if (!this.config.phoenixBloom) {
+      // Use screen blend mode if bloom is disabled
+      blendMode = THREE.CustomBlending;
+    }
+
+    const spriteMaterial = new THREE.MeshBasicMaterial({
+      map: phoenixTexture,
+      transparent: true,
+      opacity: opacity,
+      fog: false, // Don't apply fog to sprite
+      depthWrite: false, // Allow other objects to render in front if needed
+      side: THREE.DoubleSide,
+      blending: blendMode,
+      ...(blendMode === THREE.CustomBlending && {
+        blendEquation: THREE.AddEquation,
+        blendSrc: THREE.OneMinusDstColorFactor,
+        blendDst: THREE.OneFactor
+      })
+    });
+
+    // Create the sprite mesh
+    this.phoenixSprite = new THREE.Mesh(spriteGeometry, spriteMaterial);
+
+    // Position sprite at center of view, close to camera
+    this.phoenixSprite.position.set(0, 0, -50);
+
+    // Make sprite face the camera
+    this.phoenixSprite.lookAt(this.camera.position);
+
+    // Set render order to render in front of galaxy but behind UI elements
+    this.phoenixSprite.renderOrder = 0;
+
+    // Add to scene
+    this.scene.add(this.phoenixSprite);
   }
 
   private spawnInitialStars(): void {
@@ -207,6 +280,67 @@ export class StarfieldManager {
 
       // Make galaxy plane face the camera (perpendicular to camera's forward direction)
       this.galaxyPlane.lookAt(this.camera.position);
+    }
+
+    // Update phoenix sprite to stay centered and aligned with view, with optional pulsing and bloom oscillation
+    if (this.phoenixSprite) {
+      // Update animation timers
+      this.phoenixPulseTime += deltaTime;
+      this.phoenixBloomTime += deltaTime;
+
+      // Base distance from camera
+      let spriteDistance = 50;
+
+      // Apply pulsing effect if enabled
+      if (this.config.phoenixPulse) {
+        const pulseSpeed = this.config.phoenixPulseSpeed || 0.8;
+        const pulseAmplitude = this.config.phoenixPulseAmplitude || 20;
+        const pulseOffset = Math.sin(this.phoenixPulseTime * pulseSpeed) * pulseAmplitude;
+        spriteDistance += pulseOffset;
+      }
+
+      // Position sprite in front of camera
+      const forwardDirection = new THREE.Vector3(0, 0, -1);
+      forwardDirection.applyQuaternion(this.camera.quaternion);
+
+      this.phoenixSprite.position.copy(this.camera.position)
+        .add(forwardDirection.multiplyScalar(spriteDistance));
+
+      // Apply inverse rotation to keep phoenix aligned with view despite camera drift
+      if (this.driftState.enabled) {
+        // Apply positive rotation (same direction as camera) to counteract camera drift
+        this.phoenixSprite.rotation.set(0, 0, this.driftState.currentRotation);
+      } else {
+        // Reset rotation if drift is disabled
+        this.phoenixSprite.rotation.set(0, 0, 0);
+      }
+
+      // Apply bloom oscillation if enabled
+      if (this.config.phoenixBloomOscillate && this.phoenixSprite.material instanceof THREE.MeshBasicMaterial) {
+        const oscillateSpeed = this.config.phoenixBloomOscillateSpeed || 0.5;
+        const minBloom = this.config.phoenixBloomMin || 0.8;
+        const maxBloom = this.config.phoenixBloomMax || 2.2;
+
+        const bloomValue = minBloom + (maxBloom - minBloom) *
+          (0.5 + 0.5 * Math.sin(this.phoenixBloomTime * oscillateSpeed));
+
+        this.phoenixSprite.material.opacity = bloomValue;
+      }
+
+      // Update sprite size based on current viewport (for resize handling)
+      if (this.camera instanceof THREE.PerspectiveCamera) {
+        const fov = this.camera.fov * (Math.PI / 180);
+        const viewportHeight = 2 * Math.tan(fov / 2) * spriteDistance;
+        const spriteHeight = viewportHeight * 0.6; // 60% of viewport height
+        const spriteWidth = spriteHeight; // Keep aspect ratio square for now
+
+        // Update geometry scale to match new size
+        this.phoenixSprite.scale.set(
+          spriteWidth / this.phoenixSprite.geometry.parameters.width,
+          spriteHeight / this.phoenixSprite.geometry.parameters.height,
+          1
+        );
+      }
     }
 
     // Optional: Add subtle camera sway for more organic movement
@@ -344,6 +478,15 @@ export class StarfieldManager {
         this.galaxyPlane.material.dispose();
       }
       this.galaxyPlane = null;
+    }
+
+    if (this.phoenixSprite) {
+      this.scene.remove(this.phoenixSprite);
+      this.phoenixSprite.geometry.dispose();
+      if (this.phoenixSprite.material instanceof THREE.Material) {
+        this.phoenixSprite.material.dispose();
+      }
+      this.phoenixSprite = null;
     }
   }
 
