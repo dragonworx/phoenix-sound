@@ -8,8 +8,8 @@ interface MenuCarrouselProps {
   tilt?: number;
   autoSpin?: boolean;
   autoSpinSpeed?: number;
-  inertia?: number;
   className?: string;
+  onItemClick?: (index: number) => void;
 }
 
 export default function MenuCarrousel({
@@ -18,14 +18,11 @@ export default function MenuCarrousel({
   tilt = 15,
   autoSpin = false,
   autoSpinSpeed = 0.5,
-  inertia = 0.95,
-  className = ''
+  className = '',
+  onItemClick
 }: MenuCarrouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastMouseX, setLastMouseX] = useState(0);
-  const [velocity, setVelocity] = useState(0);
   const animationFrameRef = useRef<number>();
 
   useEffect(() => {
@@ -33,15 +30,8 @@ export default function MenuCarrousel({
       setRotation(prev => {
         let newRotation = prev;
 
-        if (autoSpin && !isDragging) {
+        if (autoSpin) {
           newRotation += autoSpinSpeed;
-        }
-
-        if (!isDragging && Math.abs(velocity) > 0.01) {
-          newRotation += velocity;
-          setVelocity(v => v * inertia);
-        } else if (!isDragging && !autoSpin) {
-          setVelocity(0);
         }
 
         return newRotation % 360;
@@ -57,32 +47,8 @@ export default function MenuCarrousel({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [autoSpin, autoSpinSpeed, isDragging, velocity, inertia]);
+  }, [autoSpin, autoSpinSpeed]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setLastMouseX(e.clientX);
-    setVelocity(0);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-
-    const deltaX = e.clientX - lastMouseX;
-    const rotationDelta = deltaX * 0.5;
-
-    setRotation(prev => prev + rotationDelta);
-    setVelocity(rotationDelta);
-    setLastMouseX(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
 
   const itemCount = React.Children.count(children);
   const angleStep = 360 / itemCount;
@@ -90,11 +56,7 @@ export default function MenuCarrousel({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full cursor-grab active:cursor-grabbing ${className}`}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
+      className={`relative w-full h-full ${className}`}
       style={{
         perspective: '1000px',
         perspectiveOrigin: '50% 50%'
@@ -117,11 +79,12 @@ export default function MenuCarrousel({
           return (
             <div
               key={index}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
               style={{
                 transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${-angle}deg)`,
                 zIndex: Math.round((z + radius) * 10)
               }}
+              onClick={() => onItemClick?.(index)}
             >
               {child}
             </div>
