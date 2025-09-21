@@ -411,9 +411,9 @@ export class StarfieldManager {
     this.driftState.transitionTime += deltaTime;
 
     // Debug: Log deltaTime and progress occasionally
-    if (Math.random() < 0.01) { // Log roughly 1% of frames
-      console.log(`deltaTime: ${deltaTime.toFixed(4)}s, progress: ${(this.driftState.transitionTime / this.driftState.transitionDuration * 100).toFixed(1)}%`);
-    }
+    // if (Math.random() < 0.01) { // Log roughly 1% of frames
+    //   console.log(`deltaTime: ${deltaTime.toFixed(4)}s, progress: ${(this.driftState.transitionTime / this.driftState.transitionDuration * 100).toFixed(1)}%`);
+    // }
 
     // Calculate transition progress (0 to 1)
     const progress = Math.min(this.driftState.transitionTime / this.driftState.transitionDuration, 1.0);

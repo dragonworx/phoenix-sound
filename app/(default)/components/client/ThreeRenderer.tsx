@@ -149,44 +149,6 @@ export default function ThreeRenderer({
     onResize?.(width, height);
   }, [sizing, onResize]);
 
-  const animate = useCallback(() => {
-    if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
-
-    const currentTime = performance.now();
-    const elapsedTime = currentTime / 1000;
-
-    const targetFrameTime = 1000 / frameRate;
-
-    if (currentTime - lastTimeRef.current >= targetFrameTime) {
-      // Calculate deltaTime based on target frame rate, not actual frame time
-      const deltaTime = targetFrameTime / 1000;
-      onUpdate?.(deltaTime, elapsedTime);
-
-      if (afterimagePassRef.current && afterimage) {
-        afterimagePassRef.current.enabled = afterimage.enabled ?? true;
-
-        // Handle oscillation or static damp value
-        if (afterimage.oscillation) {
-          const { min, max, speed } = afterimage.oscillation;
-          const oscillationValue = Math.sin(elapsedTime * speed) * 0.5 + 0.5; // Normalize to 0-1
-          afterimagePassRef.current.damp = min + (max - min) * oscillationValue;
-        } else if (afterimage.damp !== undefined) {
-          afterimagePassRef.current.damp = afterimage.damp;
-        }
-      }
-
-      if (composerRef.current) {
-        composerRef.current.render();
-      } else {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
-
-      lastTimeRef.current = currentTime;
-    }
-
-    animationIdRef.current = requestAnimationFrame(animate);
-  }, [frameRate, onUpdate, afterimage?.enabled]);
-
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
@@ -254,6 +216,44 @@ export default function ThreeRenderer({
       afterimagePassRef.current = afterimagePass;
     }
 
+    const animate = () => {
+      if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
+
+      const currentTime = performance.now();
+      const elapsedTime = currentTime / 1000;
+
+      const targetFrameTime = 1000 / frameRate;
+
+      if (currentTime - lastTimeRef.current >= targetFrameTime) {
+        // Calculate deltaTime based on target frame rate, not actual frame time
+        const deltaTime = targetFrameTime / 1000;
+        onUpdate?.(deltaTime, elapsedTime);
+
+        if (afterimagePassRef.current && afterimage) {
+          afterimagePassRef.current.enabled = afterimage.enabled ?? true;
+
+          // Handle oscillation or static damp value
+          if (afterimage.oscillation) {
+            const { min, max, speed } = afterimage.oscillation;
+            const oscillationValue = Math.sin(elapsedTime * speed) * 0.5 + 0.5; // Normalize to 0-1
+            afterimagePassRef.current.damp = min + (max - min) * oscillationValue;
+          } else if (afterimage.damp !== undefined) {
+            afterimagePassRef.current.damp = afterimage.damp;
+          }
+        }
+
+        if (composerRef.current) {
+          composerRef.current.render();
+        } else {
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
+        }
+
+        lastTimeRef.current = currentTime;
+      }
+
+      animationIdRef.current = requestAnimationFrame(animate);
+    };
+
     lastTimeRef.current = performance.now();
     animate();
 
@@ -264,7 +264,7 @@ export default function ThreeRenderer({
       composerRef.current?.dispose();
       renderer.dispose();
     };
-  }, [externalScene, createCamera, antialias, alpha, shadowMapEnabled, shadowMapType, pixelRatio, background, sizing, afterimage, onInit, animate]);
+  }, [externalScene, createCamera, antialias, alpha, shadowMapEnabled, shadowMapType, pixelRatio, background, sizing, afterimage, onInit]);
 
   useEffect(() => {
     if (sizing.mode === 'auto-fill') {

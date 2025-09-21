@@ -14,13 +14,22 @@ export default function About({ focused = false }: AboutProps) {
         </div>
         <div className="max-w-2xl mx-auto space-y-6">
           <p className="text-lg text-white/90 leading-relaxed">
-            Welcome to Phoenix Sound, where audio excellence meets creative innovation. We specialize in professional audio production, mixing, and sound design services that bring your artistic vision to life.
+            Welcome to Phoenix Sound, where audio excellence meets creative
+            innovation. We specialize in professional audio production, mixing,
+            and sound design services that bring your artistic vision to life.
           </p>
           <p className="text-white/80 leading-relaxed">
-            With years of experience in the industry, our team combines technical expertise with artistic sensibility to deliver exceptional audio experiences. From recording and mixing to mastering and post-production, we handle every aspect of your audio needs with precision and care.
+            With years of experience in the industry, our team combines
+            technical expertise with artistic sensibility to deliver exceptional
+            audio experiences. From recording and mixing to mastering and
+            post-production, we handle every aspect of your audio needs with
+            precision and care.
           </p>
           <p className="text-white/80 leading-relaxed">
-            Our state-of-the-art studio is equipped with industry-leading technology and acoustically optimized to ensure the highest quality results. Whether you're an artist, filmmaker, or content creator, we're here to help you achieve your sonic goals.
+            Our state-of-the-art studio is equipped with industry-leading
+            technology and acoustically optimized to ensure the highest quality
+            results. Whether you're an artist, filmmaker, or content creator,
+            we're here to help you achieve your sonic goals.
           </p>
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">Our Services</h2>

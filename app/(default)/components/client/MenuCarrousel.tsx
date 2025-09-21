@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useRef, useEffect, useState, ReactNode } from 'react';
+import React, { useRef, useEffect, useState, ReactNode } from "react";
 
 interface MenuCarrouselProps {
   children: ReactNode[];
@@ -18,8 +18,8 @@ export default function MenuCarrousel({
   tilt = 15,
   autoSpin = false,
   autoSpinSpeed = 0.5,
-  className = '',
-  onItemClick
+  className = "",
+  onItemClick,
 }: MenuCarrouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState(0);
@@ -27,7 +27,7 @@ export default function MenuCarrousel({
 
   useEffect(() => {
     const animate = () => {
-      setRotation(prev => {
+      setRotation((prev) => {
         let newRotation = prev;
 
         if (autoSpin) {
@@ -49,7 +49,6 @@ export default function MenuCarrousel({
     };
   }, [autoSpin, autoSpinSpeed]);
 
-
   const itemCount = React.Children.count(children);
   const angleStep = 360 / itemCount;
 
@@ -58,15 +57,15 @@ export default function MenuCarrousel({
       ref={containerRef}
       className={`relative w-full h-full ${className}`}
       style={{
-        perspective: '1000px',
-        perspectiveOrigin: '50% 50%'
+        perspective: "1000px",
+        perspectiveOrigin: "50% 50%",
       }}
     >
       <div
         className="relative w-full h-full preserve-3d"
         style={{
           transform: `translateZ(-100px) rotateX(${tilt}deg) rotateY(${rotation}deg)`,
-          transformStyle: 'preserve-3d'
+          transformStyle: "preserve-3d",
         }}
       >
         {React.Children.map(children, (child, index) => {
@@ -81,8 +80,8 @@ export default function MenuCarrousel({
               key={index}
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
               style={{
-                transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${-angle}deg)`,
-                zIndex: Math.round((z + radius) * 10)
+                transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${-rotation}deg)`,
+                zIndex: Math.round((z + radius) * 10),
               }}
               onClick={() => onItemClick?.(index)}
             >
