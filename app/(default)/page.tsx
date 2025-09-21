@@ -3,6 +3,8 @@
 import Header from "./components/server/Header";
 import Footer from "./components/server/Footer";
 import StarfieldRenderer from "./components/client/StarfieldRenderer";
+import MenuCarrousel from "./components/client/MenuCarrousel";
+import MenuItem from "./components/client/MenuItem";
 
 export default function HomePage() {
   return (
@@ -44,6 +46,42 @@ export default function HomePage() {
             blendMode: 'additive'
           }}
         />
+
+        {/* Floating Menu Carrousel */}
+        <div className="absolute inset-0 pointer-events-none">
+          <MenuCarrousel
+            fan={120}
+            tilt={25}
+            autoSpin={true}
+            autoSpinSpeed={0.3}
+            inertia={0.98}
+            className="w-full h-full"
+          >
+            <MenuItem>
+              <div className="text-center">
+                <div className="text-4xl mb-4">🎵</div>
+                <h3 className="text-white text-xl font-bold mb-2">Music Studio</h3>
+                <p className="text-white/80 text-sm">Professional audio production and mixing services</p>
+              </div>
+            </MenuItem>
+
+            <MenuItem>
+              <div className="text-center">
+                <div className="text-4xl mb-4">🎧</div>
+                <h3 className="text-white text-xl font-bold mb-2">Sound Design</h3>
+                <p className="text-white/80 text-sm">Custom sound effects and audio branding solutions</p>
+              </div>
+            </MenuItem>
+
+            <MenuItem>
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔊</div>
+                <h3 className="text-white text-xl font-bold mb-2">Live Events</h3>
+                <p className="text-white/80 text-sm">Concert and event audio engineering services</p>
+              </div>
+            </MenuItem>
+          </MenuCarrousel>
+        </div>
       </main>
 
       <Footer />
