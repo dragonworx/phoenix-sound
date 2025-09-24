@@ -1,17 +1,28 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useCallback } from 'react';
-import * as THREE from 'three';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { StarfieldConfig, CameraConfig, SizingConfig, AfterimageConfig } from '../starfield/StarfieldConfig';
+import { useEffect, useRef, useCallback } from "react";
+import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { AfterimagePass } from "three/addons/postprocessing/AfterimagePass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import {
+  StarfieldConfig,
+  CameraConfig,
+  SizingConfig,
+  AfterimageConfig,
+  ZoomAfterimageConfig,
+} from "../../starfield/StarfieldConfig";
+import { ZoomAfterimagePass } from "../../effects/ZoomAfterimagePass";
 
 interface ThreeRendererProps {
   scene?: THREE.Scene;
   config?: Partial<StarfieldConfig>;
-  onInit?: (renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => void;
+  onInit?: (
+    renderer: THREE.WebGLRenderer,
+    scene: THREE.Scene,
+    camera: THREE.Camera
+  ) => void;
   onUpdate?: (deltaTime: number, elapsedTime: number) => void;
   onResize?: (width: number, height: number) => void;
 }
@@ -22,14 +33,18 @@ interface LegacyThreeRendererProps {
   sizing: SizingConfig;
   camera: CameraConfig;
   frameRate?: number;
-  background?: string | 'transparent';
+  background?: string | "transparent";
   antialias?: boolean;
   alpha?: boolean;
   shadowMapEnabled?: boolean;
   shadowMapType?: THREE.ShadowMapType;
   pixelRatio?: number;
   afterimage?: AfterimageConfig;
-  onInit?: (renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) => void;
+  onInit?: (
+    renderer: THREE.WebGLRenderer,
+    scene: THREE.Scene,
+    camera: THREE.Camera
+  ) => void;
   onUpdate?: (deltaTime: number, elapsedTime: number) => void;
   onResize?: (width: number, height: number) => void;
 }
@@ -39,90 +54,96 @@ export default function ThreeRenderer({
   config = {},
   onInit,
   onUpdate,
-  onResize
+  onResize,
 }: ThreeRendererProps) {
   // Extract renderer settings from config with defaults
-  const sizing = config.sizing ?? { mode: 'auto-fill' };
+  const sizing = config.sizing ?? { mode: "auto-fill" };
   const cameraConfig = config.camera ?? {
-    type: 'perspective',
+    type: "perspective",
     position: [0, 0, 0],
     lookAt: [0, 0, -100],
     fov: 75,
     near: 0.1,
-    far: 1000
+    far: 1000,
   };
   const frameRate = config.frameRate ?? 60;
-  const background = config.background ?? '#000000';
+  const background = config.background ?? "#000000";
   const antialias = config.antialias ?? true;
   const alpha = config.alpha ?? false;
   const shadowMapEnabled = config.shadowMapEnabled ?? false;
   const shadowMapType = config.shadowMapType ?? THREE.PCFSoftShadowMap;
   const pixelRatio = config.pixelRatio;
   const afterimage = config.afterimage;
+  const zoomAfterimage = config.zoomAfterimage;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.Camera | null>(null);
   const composerRef = useRef<EffectComposer | null>(null);
   const afterimagePassRef = useRef<AfterimagePass | null>(null);
+  const zoomAfterimagePassRef = useRef<ZoomAfterimagePass | null>(null);
   const animationIdRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const createCamera = useCallback((width: number, height: number): THREE.Camera => {
-    const aspect = width / height;
+  const createCamera = useCallback(
+    (width: number, height: number): THREE.Camera => {
+      const aspect = width / height;
 
-    if (cameraConfig.type === 'perspective') {
-      const camera = new THREE.PerspectiveCamera(
-        cameraConfig.fov ?? 75,
-        aspect,
-        cameraConfig.near ?? 0.1,
-        cameraConfig.far ?? 1000
-      );
+      if (cameraConfig.type === "perspective") {
+        const camera = new THREE.PerspectiveCamera(
+          cameraConfig.fov ?? 75,
+          aspect,
+          cameraConfig.near ?? 0.1,
+          cameraConfig.far ?? 1000
+        );
 
-      if (cameraConfig.position) {
-        camera.position.set(...cameraConfig.position);
+        if (cameraConfig.position) {
+          camera.position.set(...cameraConfig.position);
+        } else {
+          camera.position.set(0, 0, 5);
+        }
+
+        if (cameraConfig.lookAt) {
+          camera.lookAt(...cameraConfig.lookAt);
+        }
+
+        return camera;
       } else {
-        camera.position.set(0, 0, 5);
+        const frustumSize = 10;
+        const camera = new THREE.OrthographicCamera(
+          cameraConfig.left ?? (-frustumSize * aspect) / 2,
+          cameraConfig.right ?? (frustumSize * aspect) / 2,
+          cameraConfig.top ?? frustumSize / 2,
+          cameraConfig.bottom ?? -frustumSize / 2,
+          cameraConfig.near ?? 0.1,
+          cameraConfig.far ?? 1000
+        );
+
+        if (cameraConfig.position) {
+          camera.position.set(...cameraConfig.position);
+        } else {
+          camera.position.set(0, 0, 5);
+        }
+
+        if (cameraConfig.lookAt) {
+          camera.lookAt(...cameraConfig.lookAt);
+        }
+
+        return camera;
       }
-
-      if (cameraConfig.lookAt) {
-        camera.lookAt(...cameraConfig.lookAt);
-      }
-
-      return camera;
-    } else {
-      const frustumSize = 10;
-      const camera = new THREE.OrthographicCamera(
-        cameraConfig.left ?? (-frustumSize * aspect) / 2,
-        cameraConfig.right ?? (frustumSize * aspect) / 2,
-        cameraConfig.top ?? frustumSize / 2,
-        cameraConfig.bottom ?? -frustumSize / 2,
-        cameraConfig.near ?? 0.1,
-        cameraConfig.far ?? 1000
-      );
-
-      if (cameraConfig.position) {
-        camera.position.set(...cameraConfig.position);
-      } else {
-        camera.position.set(0, 0, 5);
-      }
-
-      if (cameraConfig.lookAt) {
-        camera.lookAt(...cameraConfig.lookAt);
-      }
-
-      return camera;
-    }
-  }, [cameraConfig]);
+    },
+    [cameraConfig]
+  );
 
   const handleResize = useCallback(() => {
-    if (!rendererRef.current || !cameraRef.current || !containerRef.current) return;
+    if (!rendererRef.current || !cameraRef.current || !containerRef.current)
+      return;
 
     let width: number;
     let height: number;
 
-    if (sizing.mode === 'auto-fill') {
+    if (sizing.mode === "auto-fill") {
       width = containerRef.current.clientWidth;
       height = containerRef.current.clientHeight;
     } else {
@@ -155,7 +176,7 @@ export default function ThreeRenderer({
     let width: number;
     let height: number;
 
-    if (sizing.mode === 'auto-fill') {
+    if (sizing.mode === "auto-fill") {
       width = containerRef.current.clientWidth || 800;
       height = containerRef.current.clientHeight || 600;
     } else {
@@ -182,7 +203,7 @@ export default function ThreeRenderer({
       renderer.shadowMap.type = shadowMapType;
     }
 
-    if (background === 'transparent') {
+    if (background === "transparent") {
       renderer.setClearColor(0x000000, 0);
     } else {
       renderer.setClearColor(background);
@@ -197,27 +218,43 @@ export default function ThreeRenderer({
 
     onInit?.(renderer, scene, camera);
 
-    // Setup postprocessing if afterimage is enabled
-    if (afterimage) {
+    // Setup postprocessing if afterimage or zoomAfterimage is enabled
+    if (afterimage || zoomAfterimage) {
       const composer = new EffectComposer(renderer);
 
       const renderPass = new RenderPass(scene, camera);
       composer.addPass(renderPass);
 
-      const afterimagePass = new AfterimagePass();
-      afterimagePass.damp = afterimage.damp ?? 0.96;
-      composer.addPass(afterimagePass);
+      if (zoomAfterimage) {
+        const zoomAfterimagePass = new ZoomAfterimagePass(
+          zoomAfterimage.damp ?? 0.96,
+          {
+            scaleX: zoomAfterimage.scaleX ?? 1.002,
+            scaleY: zoomAfterimage.scaleY ?? 1.002,
+            translateX: zoomAfterimage.translateX ?? 0.0,
+            translateY: zoomAfterimage.translateY ?? 0.0,
+            rotation: zoomAfterimage.rotation ?? 0.0,
+            enabled: zoomAfterimage.enabled ?? true,
+          }
+        );
+        composer.addPass(zoomAfterimagePass);
+        zoomAfterimagePassRef.current = zoomAfterimagePass;
+      } else if (afterimage) {
+        const afterimagePass = new AfterimagePass();
+        afterimagePass.damp = afterimage.damp ?? 0.96;
+        composer.addPass(afterimagePass);
+        afterimagePassRef.current = afterimagePass;
+      }
 
       const outputPass = new OutputPass();
-      outputPass.toneMapping = THREE.NoToneMapping; // Disable tone mapping to preserve original colors
       composer.addPass(outputPass);
 
       composerRef.current = composer;
-      afterimagePassRef.current = afterimagePass;
     }
 
     const animate = () => {
-      if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
+      if (!rendererRef.current || !sceneRef.current || !cameraRef.current)
+        return;
 
       const currentTime = performance.now();
       const elapsedTime = currentTime / 1000;
@@ -229,14 +266,92 @@ export default function ThreeRenderer({
         const deltaTime = targetFrameTime / 1000;
         onUpdate?.(deltaTime, elapsedTime);
 
-        if (afterimagePassRef.current && afterimage) {
+        // Update zoom afterimage pass
+        if (zoomAfterimagePassRef.current && zoomAfterimage) {
+          zoomAfterimagePassRef.current.enabled =
+            zoomAfterimage.enabled ?? true;
+
+          // Handle oscillations for all parameters
+          if (zoomAfterimage.oscillation) {
+            const osc = zoomAfterimage.oscillation;
+
+            if (osc.damp) {
+              const dampOsc =
+                Math.sin(elapsedTime * osc.damp.speed) * 0.5 + 0.5;
+              zoomAfterimagePassRef.current.damp =
+                osc.damp.min + (osc.damp.max - osc.damp.min) * dampOsc;
+            }
+
+            if (osc.scaleX) {
+              const scaleXOsc =
+                Math.sin(elapsedTime * osc.scaleX.speed) * 0.5 + 0.5;
+              zoomAfterimagePassRef.current.scaleX =
+                osc.scaleX.min + (osc.scaleX.max - osc.scaleX.min) * scaleXOsc;
+            }
+
+            if (osc.scaleY) {
+              const scaleYOsc =
+                Math.sin(elapsedTime * osc.scaleY.speed) * 0.5 + 0.5;
+              zoomAfterimagePassRef.current.scaleY =
+                osc.scaleY.min + (osc.scaleY.max - osc.scaleY.min) * scaleYOsc;
+            }
+
+            if (osc.translateX) {
+              const translateXOsc = Math.sin(
+                elapsedTime * osc.translateX.speed
+              );
+              zoomAfterimagePassRef.current.translateX =
+                osc.translateX.min +
+                (osc.translateX.max - osc.translateX.min) *
+                  (translateXOsc * 0.5 + 0.5);
+            }
+
+            if (osc.translateY) {
+              const translateYOsc = Math.sin(
+                elapsedTime * osc.translateY.speed
+              );
+              zoomAfterimagePassRef.current.translateY =
+                osc.translateY.min +
+                (osc.translateY.max - osc.translateY.min) *
+                  (translateYOsc * 0.5 + 0.5);
+            }
+
+            if (osc.rotation) {
+              const rotationOsc = Math.sin(elapsedTime * osc.rotation.speed);
+              zoomAfterimagePassRef.current.rotation =
+                osc.rotation.min +
+                (osc.rotation.max - osc.rotation.min) *
+                  (rotationOsc * 0.5 + 0.5);
+            }
+          } else {
+            // Use static values
+            if (zoomAfterimage.damp !== undefined)
+              zoomAfterimagePassRef.current.damp = zoomAfterimage.damp;
+            if (zoomAfterimage.scaleX !== undefined)
+              zoomAfterimagePassRef.current.scaleX = zoomAfterimage.scaleX;
+            if (zoomAfterimage.scaleY !== undefined)
+              zoomAfterimagePassRef.current.scaleY = zoomAfterimage.scaleY;
+            if (zoomAfterimage.translateX !== undefined)
+              zoomAfterimagePassRef.current.translateX =
+                zoomAfterimage.translateX;
+            if (zoomAfterimage.translateY !== undefined)
+              zoomAfterimagePassRef.current.translateY =
+                zoomAfterimage.translateY;
+            if (zoomAfterimage.rotation !== undefined)
+              zoomAfterimagePassRef.current.rotation = zoomAfterimage.rotation;
+          }
+        }
+
+        // Fallback to regular afterimage if zoom afterimage is not used
+        if (afterimagePassRef.current && afterimage && !zoomAfterimage) {
           afterimagePassRef.current.enabled = afterimage.enabled ?? true;
 
           // Handle oscillation or static damp value
           if (afterimage.oscillation) {
             const { min, max, speed } = afterimage.oscillation;
             const oscillationValue = Math.sin(elapsedTime * speed) * 0.5 + 0.5; // Normalize to 0-1
-            afterimagePassRef.current.damp = min + (max - min) * oscillationValue;
+            afterimagePassRef.current.damp =
+              min + (max - min) * oscillationValue;
           } else if (afterimage.damp !== undefined) {
             afterimagePassRef.current.damp = afterimage.damp;
           }
@@ -264,32 +379,46 @@ export default function ThreeRenderer({
       composerRef.current?.dispose();
       renderer.dispose();
     };
-  }, [externalScene, createCamera, antialias, alpha, shadowMapEnabled, shadowMapType, pixelRatio, background, sizing, afterimage, onInit]);
+  }, [
+    externalScene,
+    createCamera,
+    antialias,
+    alpha,
+    shadowMapEnabled,
+    shadowMapType,
+    pixelRatio,
+    background,
+    sizing,
+    afterimage,
+    zoomAfterimage,
+    onInit,
+  ]);
 
   useEffect(() => {
-    if (sizing.mode === 'auto-fill') {
+    if (sizing.mode === "auto-fill") {
       const resizeObserver = new ResizeObserver(handleResize);
       if (containerRef.current) {
         resizeObserver.observe(containerRef.current);
       }
 
-      window.addEventListener('resize', handleResize);
+      window.addEventListener("resize", handleResize);
 
       return () => {
         resizeObserver.disconnect();
-        window.removeEventListener('resize', handleResize);
+        window.removeEventListener("resize", handleResize);
       };
     }
   }, [handleResize, sizing.mode]);
 
-  const containerStyle: React.CSSProperties = sizing.mode === 'auto-fill'
-    ? { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }
-    : { width: sizing.width, height: sizing.height };
+  const containerStyle: React.CSSProperties =
+    sizing.mode === "auto-fill"
+      ? { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }
+      : { width: sizing.width, height: sizing.height };
 
   const canvasStyle: React.CSSProperties = {
-    display: 'block',
-    width: '100%',
-    height: '100%',
+    display: "block",
+    width: "100%",
+    height: "100%",
   };
 
   return (

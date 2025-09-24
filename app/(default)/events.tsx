@@ -58,7 +58,7 @@ export default function Events({ focused = false }: EventsProps) {
       <div className="text-center">
         <div className="text-4xl mb-4">📅</div>
         <h3 className="text-white text-xl font-bold mb-2">Events</h3>
-        <p className="text-white/80 text-sm">See upcoming events and book</p>
+        <p className="text-white/80 text-sm">Upcoming events</p>
       </div>
     </MenuItem>
   );

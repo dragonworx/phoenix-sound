@@ -49,6 +49,25 @@ export interface AfterimageConfig {
   };
 }
 
+// Zoom afterimage effect configuration with transformations
+export interface ZoomAfterimageConfig {
+  enabled?: boolean;
+  damp?: number;
+  scaleX?: number;
+  scaleY?: number;
+  translateX?: number;
+  translateY?: number;
+  rotation?: number;
+  oscillation?: {
+    damp?: { min: number; max: number; speed: number };
+    scaleX?: { min: number; max: number; speed: number };
+    scaleY?: { min: number; max: number; speed: number };
+    translateX?: { min: number; max: number; speed: number };
+    translateY?: { min: number; max: number; speed: number };
+    rotation?: { min: number; max: number; speed: number };
+  };
+}
+
 // Unified configuration interface combining all renderer and starfield settings
 export interface StarfieldConfig {
   // Renderer settings
@@ -62,6 +81,7 @@ export interface StarfieldConfig {
   shadowMapType?: THREE.ShadowMapType;
   pixelRatio?: number;
   afterimage?: AfterimageConfig;
+  zoomAfterimage?: ZoomAfterimageConfig;
 
   // Movement and speed
   speed: number;
@@ -126,12 +146,18 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   alpha: true,
   shadowMapEnabled: false,
   shadowMapType: THREE.PCFSoftShadowMap,
-  afterimage: {
+  zoomAfterimage: {
     enabled: true,
+    damp: 0.96,
+    scaleX: 1.003,
+    scaleY: 1.003,
+    translateX: 0.0,
+    translateY: 0.0,
+    rotation: 0.0,
     oscillation: {
-      min: 0.5,
-      max: 0.9,
-      speed: 0.1
+      damp: { min: 0.94, max: 0.98, speed: 0.15 },
+      scaleX: { min: 1.001, max: 1.005, speed: 0.08 },
+      scaleY: { min: 1.001, max: 1.005, speed: 0.08 }
     }
   },
 
@@ -170,11 +196,11 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   phoenixPulseSpeed: 0.8,
   phoenixPulseAmplitude: 20,
   phoenixBloom: true,
-  phoenixBloomStrength: 1.5,
+  phoenixBloomStrength: 3,
   phoenixBloomOscillate: true,
-  phoenixBloomOscillateSpeed: 0.5,
+  phoenixBloomOscillateSpeed: 1.5,
   phoenixBloomMin: 0.8,
-  phoenixBloomMax: 2.2,
+  phoenixBloomMax: 3.2,
 
   // Performance
   instanceBatchSize: 100,

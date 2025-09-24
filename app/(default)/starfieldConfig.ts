@@ -12,12 +12,15 @@ export default {
             },
             background: 'black',
             alpha: true,
-            afterimage: {
+            zoomAfterimage: {
               enabled: true,
+              scaleX: 1.005,
+              scaleY: 1.005,
+              translateX: 0.0,
+              translateY: 0.0,
+              rotation: 0.0,
               oscillation: {
-                min: 0.5,
-                max: 0.9,
-                speed: 0.1
+                damp: { min: 0.1, max: 0.5, speed: 1.0 }
               }
             },
 

@@ -4,10 +4,11 @@ import { requireAuthAPI } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const event = await EventModel.findById(parseInt(params.id));
+    const event = await EventModel.findById(parseInt(id));
     if (!event) {
       return NextResponse.json(
         { message: 'Event not found' },
@@ -26,8 +27,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await requireAuthAPI();
 
@@ -41,7 +43,7 @@ export async function PUT(
     }
 
     const event = await EventModel.update(
-      parseInt(params.id),
+      parseInt(id),
       title,
       description || '',
       new Date(date)
@@ -72,12 +74,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await requireAuthAPI();
 
-    const success = await EventModel.delete(parseInt(params.id));
+    const success = await EventModel.delete(parseInt(id));
     if (!success) {
       return NextResponse.json(
         { message: 'Event not found' },

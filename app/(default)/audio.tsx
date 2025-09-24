@@ -71,9 +71,7 @@ export default function Audio({ focused = false }: AudioProps) {
       <div className="text-center">
         <div className="text-4xl mb-4">🎧</div>
         <h3 className="text-white text-xl font-bold mb-2">Recordings</h3>
-        <p className="text-white/80 text-sm">
-          Listen live recordings from our events
-        </p>
+        <p className="text-white/80 text-sm">Live recordings from our events</p>
       </div>
     </MenuItem>
   );

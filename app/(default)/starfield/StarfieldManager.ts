@@ -159,7 +159,7 @@ export class StarfieldManager {
     // Create plane geometry and unlit material with screen blend mode
     const spriteGeometry = new THREE.PlaneGeometry(spriteWidth, spriteHeight);
     // Choose blending mode based on config
-    let blendMode: number = THREE.AdditiveBlending; // Default bloom effect
+    let blendMode: THREE.Blending = THREE.AdditiveBlending; // Default bloom effect
     let opacity = this.config.phoenixBloom ? this.config.phoenixBloomStrength || 1.5 : 1.0;
 
     if (!this.config.phoenixBloom) {
@@ -335,9 +335,10 @@ export class StarfieldManager {
         const spriteWidth = spriteHeight; // Keep aspect ratio square for now
 
         // Update geometry scale to match new size
+        const geometry = this.phoenixSprite.geometry as THREE.PlaneGeometry;
         this.phoenixSprite.scale.set(
-          spriteWidth / this.phoenixSprite.geometry.parameters.width,
-          spriteHeight / this.phoenixSprite.geometry.parameters.height,
+          spriteWidth / geometry.parameters.width,
+          spriteHeight / geometry.parameters.height,
           1
         );
       }

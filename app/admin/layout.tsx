@@ -1,6 +1,6 @@
 import '../(default)/globals.css';
 
-export const Metadata = {
+export const metadata = {
   title: 'Phoenix Sound Admin',
   description: 'Phoenix Sound Administration Panel',
 }

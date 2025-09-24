@@ -51,7 +51,7 @@ export default function About({ focused = false }: AboutProps) {
       <div className="text-center">
         <div className="text-4xl mb-4">💬</div>
         <h3 className="text-white text-xl font-bold mb-2">About</h3>
-        <p className="text-white/80 text-sm">Learn about our team</p>
+        <p className="text-white/80 text-sm">Our mission and values</p>
       </div>
     </MenuItem>
   );

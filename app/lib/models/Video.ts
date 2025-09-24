@@ -44,6 +44,6 @@ export class VideoModel {
 
   static async delete(id: number): Promise<boolean> {
     const result = await pool.query('DELETE FROM video WHERE id = $1', [id]);
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
