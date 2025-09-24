@@ -9,3 +9,28 @@
 body {
     overflow: hidden;
 }
+
+/* Fade-in animations for staggered page reveal */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in-canvas {
+    opacity: 0;
+    animation: fadeIn 3s ease-in-out 0s forwards;
+}
+
+.fade-in-carousel {
+    opacity: 0;
+    animation: fadeIn 3s ease-in-out 4s forwards;
+}
+
+.fade-in-header-footer {
+    opacity: 0;
+    animation: fadeIn 3s ease-in-out 8s forwards;
+}

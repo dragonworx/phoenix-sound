@@ -54,14 +54,16 @@ export default function HomePage() {
 
   return (
     <div className="h-screen relative bg-black">
-      <Header onClick={handleItemClick} />
+      <Header onClick={handleItemClick} className="fade-in-header-footer" />
 
       <main className="absolute inset-0">
-        <StarfieldRenderer config={config} />
+        <div className="fade-in-canvas">
+          <StarfieldRenderer config={config} />
+        </div>
 
         {/* Floating Menu Carrousel */}
         {focusedItem === null && (
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none fade-in-carousel">
             <MenuCarrousel
               fan={120}
               tilt={25}
@@ -100,7 +102,7 @@ export default function HomePage() {
         )}
       </main>
 
-      <Footer />
+      <Footer className="fade-in-header-footer" />
     </div>
   );
 }

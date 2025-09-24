@@ -1,10 +1,11 @@
 export interface HeaderProps {
   onClick: (index: number) => void;
+  className?: string;
 }
 
-export default function Header({ onClick }: HeaderProps) {
+export default function Header({ onClick, className = "" }: HeaderProps) {
   return (
-    <header className="bg-black/10 backdrop-blur-sm text-white w-full p-2.5 absolute top-0 left-0 right-0 z-10 border-b border-white/20">
+    <header className={`bg-black/10 backdrop-blur-sm text-white w-full p-2.5 absolute top-0 left-0 right-0 z-10 border-b border-white/20 ${className}`}>
       <div className="flex justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gray-600 rounded-full flex">
