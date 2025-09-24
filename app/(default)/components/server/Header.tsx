@@ -1,4 +1,8 @@
-export default function Header() {
+export interface HeaderProps {
+  onClick: (index: number) => void;
+}
+
+export default function Header({ onClick }: HeaderProps) {
   return (
     <header className="bg-black/10 backdrop-blur-sm text-white w-full p-2.5 absolute top-0 left-0 right-0 z-10 border-b border-white/20">
       <div className="flex justify-between">
@@ -13,9 +17,24 @@ export default function Header() {
           <h1 className="text-xl font-bold">Phoenix Sound</h1>
         </div>
         <div className="flex items-center space-x-2.5">
-          <button className="text-white hover:text-gray-300">About</button>
-          <button className="text-white hover:text-gray-300">Events</button>
-          <button className="text-white hover:text-gray-300">Recordings</button>
+          <button
+            className="text-white hover:text-gray-300"
+            onClick={() => onClick(0)}
+          >
+            About
+          </button>
+          <button
+            className="text-white hover:text-gray-300"
+            onClick={() => onClick(1)}
+          >
+            Events
+          </button>
+          <button
+            className="text-white hover:text-gray-300"
+            onClick={() => onClick(2)}
+          >
+            Recordings
+          </button>
         </div>
       </div>
     </header>

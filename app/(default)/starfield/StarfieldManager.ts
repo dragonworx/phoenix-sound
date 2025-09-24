@@ -159,7 +159,7 @@ export class StarfieldManager {
     // Create plane geometry and unlit material with screen blend mode
     const spriteGeometry = new THREE.PlaneGeometry(spriteWidth, spriteHeight);
     // Choose blending mode based on config
-    let blendMode = THREE.AdditiveBlending; // Default bloom effect
+    let blendMode: number = THREE.AdditiveBlending; // Default bloom effect
     let opacity = this.config.phoenixBloom ? this.config.phoenixBloomStrength || 1.5 : 1.0;
 
     if (!this.config.phoenixBloom) {

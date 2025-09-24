@@ -9,7 +9,7 @@ export default function About({ focused = false }: AboutProps) {
     return (
       <div className="text-white">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-6">🎵</div>
+          <div className="text-6xl mb-6">💬</div>
           <h1 className="text-4xl font-bold mb-4">About Phoenix Sound</h1>
         </div>
         <div className="max-w-2xl mx-auto space-y-6">
@@ -49,11 +49,9 @@ export default function About({ focused = false }: AboutProps) {
   return (
     <MenuItem>
       <div className="text-center">
-        <div className="text-4xl mb-4">🎵</div>
+        <div className="text-4xl mb-4">💬</div>
         <h3 className="text-white text-xl font-bold mb-2">About</h3>
-        <p className="text-white/80 text-sm">
-          Professional audio production and mixing services
-        </p>
+        <p className="text-white/80 text-sm">Learn about our team</p>
       </div>
     </MenuItem>
   );

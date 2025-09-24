@@ -23,7 +23,7 @@ export default function MenuCarrousel({
 }: MenuCarrouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState(0);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number>(0);
 
   useEffect(() => {
     const animate = () => {

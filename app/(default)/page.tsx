@@ -54,7 +54,7 @@ export default function HomePage() {
 
   return (
     <div className="h-screen relative bg-black">
-      <Header />
+      <Header onClick={handleItemClick} />
 
       <main className="absolute inset-0">
         <StarfieldRenderer config={config} />
