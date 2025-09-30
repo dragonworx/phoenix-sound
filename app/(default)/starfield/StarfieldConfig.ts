@@ -68,7 +68,7 @@ export interface ZoomAfterimageConfig {
   };
 }
 
-// Unified configuration interface combining all renderer and starfield settings
+// Unified configuration interface combining all renderer and starfield settings !
 export interface StarfieldConfig {
   // Renderer settings
   sizing: SizingConfig;
