@@ -198,3 +198,4 @@ bun run docker:fresh
 4. Run `bun run lint` to check code style
 5. Test your changes locally
 6. Submit a pull request
+
