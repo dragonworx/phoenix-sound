@@ -9,7 +9,7 @@ export default function Footer({ className = "" }: FooterProps) {
     >
       <div className="text-center">
         <p className="text-sm">
-          © 2025 Phoenix Sound. All rights reserved. Website by Ali Chamas
+          © 2025 Phoenix Sound. All rights reserved. Site by Ali Chamas
         </p>
       </div>
     </footer>

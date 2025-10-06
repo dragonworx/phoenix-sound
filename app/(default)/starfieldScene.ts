@@ -27,8 +27,6 @@ export const starfieldScene = (
 
   // Set up camera initial position and settings
   setupCamera(camera);
-
-  console.log('Starfield scene initialized with', finalConfig.maxStars, 'max stars');
 };
 
 /**

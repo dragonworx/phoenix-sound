@@ -1,20 +1,31 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import config from "./starfieldConfig";
 
 import Header from "./components/server/Header";
 import Footer from "./components/server/Footer";
 import StarfieldRenderer from "./components/client/StarfieldRenderer";
 import MenuCarrousel from "./components/client/MenuCarrousel";
-import MenuItem from "./components/client/MenuItem";
 import CloseButton from "./components/client/CloseButton";
-import About from "./about";
-import Events from "./events";
-import Audio from "./audio";
+import About from "./components/client/About";
+import Events from "./components/client/Events";
+import Audio, { type AudioRef } from "./components/client/Audio";
 
 export default function HomePage() {
   const [focusedItem, setFocusedItem] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+  const hasPlayingVideoRef = useRef(false);
+  const audioComponentRef = useRef<AudioRef | null>(null);
+  const headerRef = useRef<{ stop: () => void } | null>(null);
+
+  const handleVideoStateChange = (hasPlayingVideo: boolean) => {
+    hasPlayingVideoRef.current = hasPlayingVideo;
+  };
+
+  const handleVideoPlay = () => {
+    headerRef.current?.stop();
+  };
 
   const menuItems = [
     {
@@ -29,7 +40,14 @@ export default function HomePage() {
     },
     {
       component: <Audio />,
-      focusedComponent: <Audio focused={true} />,
+      focusedComponent: (
+        <Audio
+          ref={audioComponentRef}
+          focused={true}
+          onVideoStateChange={handleVideoStateChange}
+          onVideoPlay={handleVideoPlay}
+        />
+      ),
       name: "Audio",
     },
   ];
@@ -40,9 +58,21 @@ export default function HomePage() {
   };
 
   const handleClose = () => {
+    // If Audio is focused (index 2) and has playing video, stop video only
+    if (focusedItem === 2 && hasPlayingVideoRef.current) {
+      audioComponentRef.current?.stopVideo();
+      return;
+    }
+
+    // Otherwise close the focused item entirely
     setFocusedItem(null);
     setIsAnimating(false);
   };
+
+  useEffect(() => {
+    // Mark as initially loaded after component mounts
+    setHasInitiallyLoaded(true);
+  }, []);
 
   useEffect(() => {
     if (focusedItem !== null) {
@@ -54,7 +84,7 @@ export default function HomePage() {
 
   return (
     <div className="h-screen relative bg-black">
-      <Header onClick={handleItemClick} className="fade-in-header-footer" />
+      <Header ref={headerRef} onClick={handleItemClick} className="fade-in-header-footer" />
 
       <main className="absolute inset-0">
         <div className="fade-in-canvas">
@@ -63,7 +93,11 @@ export default function HomePage() {
 
         {/* Floating Menu Carrousel */}
         {focusedItem === null && (
-          <div className="absolute inset-0 pointer-events-none fade-in-carousel">
+          <div
+            className={`absolute inset-0 pointer-events-none ${
+              !hasInitiallyLoaded ? "fade-in-carousel" : ""
+            }`}
+          >
             <MenuCarrousel
               fan={120}
               tilt={25}
@@ -87,7 +121,7 @@ export default function HomePage() {
             }`}
           >
             <div
-              className={`relative w-full h-full max-w-4xl max-h-4xl bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-xl${
+              className={`relative w-full max-w-4xl max-h-4xl bg-white/10 border border-white/20 rounded-lg shadow-xl${
                 isAnimating
                   ? "scale-90 translate-y-8 opacity-0"
                   : "scale-100 translate-y-0 opacity-100"

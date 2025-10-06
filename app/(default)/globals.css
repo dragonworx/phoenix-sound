@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Uniwars';
+    src: url('/uniwars sb.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     user-select: none;
 }
@@ -33,4 +40,8 @@ body {
 .fade-in-header-footer {
     opacity: 0;
     animation: fadeIn 3s ease-in-out 8s forwards;
+}
+
+.text-shadow {
+    text-shadow: 0px 2px 3px black;
 }

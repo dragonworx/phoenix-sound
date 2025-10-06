@@ -1,41 +1,11 @@
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15
-    container_name: phoenixsound_postgres
-    environment:
-      POSTGRES_DB: phoenixsound
-      POSTGRES_USER: phoenix_user
-      POSTGRES_PASSWORD: phoenix_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-
-  # pgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: phoenixsound_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@phoenixsound.com
-      PGADMIN_DEFAULT_PASSWORD: admin_password
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    restart: unless-stopped
-
   # Development service with hot reloading
   web-dev:
     build:
       context: .
       target: development
     ports:
-      - "3000:3000"  # Next.js dev server
+      - "3000:3000" # Next.js dev server
     volumes:
       # Mount the entire project directory for hot reloading
       - .:/app
@@ -61,7 +31,3 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
-
-volumes:
-  postgres_data:
-  pgadmin_data:

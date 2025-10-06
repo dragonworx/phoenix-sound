@@ -396,8 +396,6 @@ export class StarfieldManager {
     const maxDuration = this.config.maxDriftDuration || 20.0;
     this.driftState.transitionDuration = minDuration + Math.random() * (maxDuration - minDuration);
 
-    console.log(`New drift target: ${(this.driftState.targetRotation * 180 / Math.PI).toFixed(1)}°, duration: ${this.driftState.transitionDuration.toFixed(1)}s`);
-
     this.driftState.isTransitioning = true;
   }
 
