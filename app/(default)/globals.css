@@ -39,7 +39,7 @@ body {
 
 .fade-in-header-footer {
     opacity: 0;
-    animation: fadeIn 3s ease-in-out 8s forwards;
+    animation: fadeIn 3s ease-in-out 4s forwards;
 }
 
 .text-shadow {
