@@ -81,7 +81,7 @@ export class StarfieldManager {
   private createGalaxyBackground(): void {
     // Load galaxy texture
     const textureLoader = new THREE.TextureLoader();
-    const galaxyTexture = textureLoader.load('/img/galaxy.png');
+    const galaxyTexture = textureLoader.load('/img/galaxy.jpg');
 
     // Disable sRGB color space to prevent gamma correction brightening
     galaxyTexture.colorSpace = THREE.LinearSRGBColorSpace;
