@@ -3,7 +3,12 @@
 import { useState, useImperativeHandle, forwardRef } from "react";
 import MenuItem, { GALAXY_IMAGES } from "./MenuItem";
 import Media from "./Media";
+import Event from "./Event";
 import eventsData from "../../data.json";
+
+// UPCOMING EVENTS CONFIGURATION
+// Set to true to show upcoming events, false to hide them
+const SHOW_UPCOMING_EVENTS = true;
 
 interface AudioProps {
   focused?: boolean;
@@ -36,6 +41,7 @@ const Audio = forwardRef<AudioRef, AudioProps>(
 
   if (focused) {
     const galaxyImage = GALAXY_IMAGES[2];
+    const upcoming = eventsData.upcoming;
 
     return (
       <div
@@ -50,12 +56,34 @@ const Audio = forwardRef<AudioRef, AudioProps>(
         }}
       >
         <div className="text-center mb-8">
-          <div className="text-6xl mb-6">🎧</div>
-          <h1 className="text-4xl font-bold mb-4">Audio</h1>
+          <div className="text-6xl mb-6">📅</div>
+          <h1 className="text-4xl font-bold mb-4">Events</h1>
         </div>
+
+        {/* Upcoming Events Section */}
+        <div className="max-w-2xl mx-auto space-y-6 mb-12">
+          <h2 className="text-2xl font-bold text-white/90">Upcoming Events:</h2>
+          {SHOW_UPCOMING_EVENTS ? (
+            <Event
+              title={upcoming.title}
+              date={upcoming.date}
+              location={upcoming.location}
+              isUpcoming={true}
+            />
+          ) : (
+            <div className="bg-white/5 p-8 rounded-lg border border-white/10 text-center">
+              <p className="text-lg text-white/70">
+                No upcoming events scheduled at this time. Check back soon!
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Recordings Section */}
         <div className="max-w-2xl mx-auto space-y-6">
+          <h2 className="text-2xl font-bold text-white/90">Recordings:</h2>
           <p className="text-lg text-white/90 leading-relaxed">
-            Hear our recordings.
+            Hear our recordings from past events.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             {eventsData.events.map((event, index) => (
@@ -80,9 +108,9 @@ const Audio = forwardRef<AudioRef, AudioProps>(
     return (
       <MenuItem imageIndex={3}>
         <div className="text-center">
-          <div className="text-4xl mb-4">🎧</div>
-          <h3 className="text-white text-xl font-bold mb-2">Recordings</h3>
-          <p className="text-white/80 text-sm">Live recordings from our events</p>
+          <div className="text-4xl mb-4">📅</div>
+          <h3 className="text-white text-xl font-bold mb-2">Events</h3>
+          <p className="text-white/80 text-sm">Upcoming events and recordings</p>
         </div>
       </MenuItem>
     );

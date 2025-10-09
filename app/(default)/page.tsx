@@ -8,7 +8,6 @@ import StarfieldRenderer from "./components/client/StarfieldRenderer";
 import MenuCarrousel from "./components/client/MenuCarrousel";
 import CloseButton from "./components/client/CloseButton";
 import About from "./components/client/About";
-import Events from "./components/client/Events";
 import Audio, { type AudioRef } from "./components/client/Audio";
 
 export default function HomePage() {
@@ -34,11 +33,6 @@ export default function HomePage() {
       name: "About",
     },
     {
-      component: <Events />,
-      focusedComponent: <Events focused={true} />,
-      name: "Events",
-    },
-    {
       component: <Audio />,
       focusedComponent: (
         <Audio
@@ -48,7 +42,7 @@ export default function HomePage() {
           onVideoPlay={handleVideoPlay}
         />
       ),
-      name: "Audio",
+      name: "Events",
     },
   ];
 
@@ -58,8 +52,8 @@ export default function HomePage() {
   };
 
   const handleClose = () => {
-    // If Audio is focused (index 2) and has playing video, stop video only
-    if (focusedItem === 2 && hasPlayingVideoRef.current) {
+    // If Events (formerly Audio, index 1) is focused and has playing video, stop video only
+    if (focusedItem === 1 && hasPlayingVideoRef.current) {
       audioComponentRef.current?.stopVideo();
       return;
     }

@@ -14,7 +14,7 @@ interface MenuCarrouselProps {
 
 export default function MenuCarrousel({
   children,
-  fan = 260,
+  fan = 150,
   tilt = 15,
   autoSpin = false,
   autoSpinSpeed = 0.75,

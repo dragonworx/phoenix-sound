@@ -42,12 +42,6 @@ const Header = forwardRef<SoundToggleRef, HeaderProps>(
             >
               Events
             </button>
-            <button
-              className="text-white hover:text-gray-300"
-              onClick={() => onClick(2)}
-            >
-              Recordings
-            </button>
           </div>
         </div>
       </header>

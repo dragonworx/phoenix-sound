@@ -5,6 +5,9 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   output: 'standalone',
+  devIndicators: {
+    position: false, // Disables the indicator
+  },
 }
 
 module.exports = nextConfig
