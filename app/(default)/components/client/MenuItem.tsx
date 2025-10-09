@@ -35,8 +35,8 @@ export default function MenuItem({
     <div
       className={`backdrop-blur-md  border border-white/20 rounded-lg p-6 shadow-lg hover:shadow-2xl hover:border-white/40 active:scale-95 pointer-events-auto ${className}`}
       style={{
-        width: "250px",
-        height: "180px",
+        width: "200px",
+        height: "120px",
         willChange: "transform", // Optimize for animations
         backgroundImage: getBackground(false),
         backgroundPosition: "center",

@@ -8,7 +8,7 @@ import StarfieldRenderer from "./components/client/StarfieldRenderer";
 import MenuCarrousel from "./components/client/MenuCarrousel";
 import CloseButton from "./components/client/CloseButton";
 import About from "./components/client/About";
-import Audio, { type AudioRef } from "./components/client/Audio";
+import Audio, { type AudioRef } from "./components/client/Events";
 
 export default function HomePage() {
   const [focusedItem, setFocusedItem] = useState<number | null>(null);
@@ -97,7 +97,7 @@ export default function HomePage() {
             }`}
           >
             <MenuCarrousel
-              fan={200}
+              fan={150}
               tilt={30}
               autoSpin={true}
               autoSpinSpeed={0.1}

@@ -39,7 +39,7 @@ export default function About({ focused = false }: AboutProps) {
             <p className="text-white/90 leading-relaxed">
               Founder of Phoenix Studio with 30 years of experience as a dancer,
               clinical pilates educator, and somatic movement practitioner.
-              Guiding you through exercises to release tension and stress.
+              Guiding you through the release of tension through to yoga nidra.
             </p>
           </div>
 
@@ -54,9 +54,9 @@ export default function About({ focused = false }: AboutProps) {
             </div>
             <h2 className="text-2xl font-bold mb-3">Ali Chamas</h2>
             <p className="text-white/90 leading-relaxed">
-              Live musician with film and television experience. Creating live
+              Live musician with film and television work. Creates live
               spontaneous and unique ambient soundscapes through digital FX,
-              loops, and deep textures to take you on a sonic journey.
+              loops, and textures to take you on a deep sonic journey.
             </p>
           </div>
         </div>
@@ -67,9 +67,10 @@ export default function About({ focused = false }: AboutProps) {
   return (
     <MenuItem imageIndex={0}>
       <div className="text-center">
-        <div className="text-4xl mb-4">💬</div>
-        <h3 className="text-white text-xl font-bold mb-2">About</h3>
-        <p className="text-white/80 text-sm">Our mission and values</p>
+        <h3 className="text-white text-xl font-bold mb-2">The Team</h3>
+        <p className="text-white/80 text-sm">
+          The team behind Phoenix Sound...
+        </p>
       </div>
     </MenuItem>
   );

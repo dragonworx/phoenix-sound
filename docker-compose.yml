@@ -15,8 +15,6 @@ services:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://phoenix_user:phoenix_password@postgres:5432/phoenixsound
     command: bun run dev
-    depends_on:
-      - postgres
 
   # Production service
   web-prod:
@@ -28,6 +26,4 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://phoenix_user:phoenix_password@postgres:5432/phoenixsound
-    depends_on:
-      - postgres
     restart: unless-stopped
