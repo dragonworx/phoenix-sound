@@ -17,7 +17,7 @@ export default function MenuCarrousel({
   fan = 260,
   tilt = 15,
   autoSpin = false,
-  autoSpinSpeed = 1.75,
+  autoSpinSpeed = 0.75,
   className = "",
   onItemClick,
 }: MenuCarrouselProps) {
