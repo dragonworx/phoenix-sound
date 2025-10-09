@@ -22,7 +22,6 @@ export default function About({ focused = false }: AboutProps) {
         }}
       >
         <div className="text-center mb-8">
-          <div className="text-6xl mb-6">💬</div>
           <h1 className="text-4xl font-bold mb-4">About Phoenix Sound</h1>
         </div>
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
@@ -35,11 +34,12 @@ export default function About({ focused = false }: AboutProps) {
                 className="w-full h-full object-cover"
               />
             </div>
-            <h2 className="text-2xl font-bold mb-3">Liz Chamas</h2>
+            <h2 className="text-2xl font-bold mb-3">Liz Chamas ❤️</h2>
             <p className="text-white/90 leading-relaxed">
               Founder of Phoenix Studio with 30 years of experience as a dancer,
               clinical pilates educator, and somatic movement practitioner.
-              Guiding you through the release of tension through to yoga nidra.
+              Guiding you through the release of tension all the way to yoga
+              nidra.
             </p>
           </div>
 
@@ -52,9 +52,9 @@ export default function About({ focused = false }: AboutProps) {
                 className="w-full h-full object-cover"
               />
             </div>
-            <h2 className="text-2xl font-bold mb-3">Ali Chamas</h2>
+            <h2 className="text-2xl font-bold mb-3">Ali Chamas 🔥</h2>
             <p className="text-white/90 leading-relaxed">
-              Live musician with film and television work. Creates live
+              Seasoned musician with a unique live setup, improvising
               spontaneous and unique ambient soundscapes through digital FX,
               loops, and textures to take you on a deep sonic journey.
             </p>

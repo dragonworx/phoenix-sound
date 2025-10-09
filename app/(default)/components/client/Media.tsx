@@ -36,8 +36,8 @@ export default function Media({
   return (
     <div className="bg-white/5 p-6 rounded-lg border border-white/10 relative">
       <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-white/80 text-sm mb-2">{date}</p>
-      <p className="text-white/80 text-sm mb-4">{location}</p>
+      <p className="text-white/80 font-bold text-sm mb-2">{date}</p>
+      <p className="text-white/80 text-xs mb-4">{location}</p>
 
       <div className="relative mt-4 group cursor-pointer" onClick={onPlay}>
         <img

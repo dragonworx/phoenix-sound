@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useImperativeHandle, forwardRef } from "react";
+import { useState, useImperativeHandle, forwardRef, useMemo } from "react";
 import MenuItem, { GALAXY_IMAGES } from "./MenuItem";
 import Media from "./Media";
 import Event from "./Event";
@@ -39,6 +39,8 @@ const Audio = forwardRef<AudioRef, AudioProps>(
       stopVideo: handleStopVideo,
     }));
 
+    const data = useMemo(() => eventsData.events, []);
+
     if (focused) {
       const galaxyImage = GALAXY_IMAGES[2];
       const upcoming = eventsData.upcoming;
@@ -56,7 +58,6 @@ const Audio = forwardRef<AudioRef, AudioProps>(
           }}
         >
           <div className="text-center mb-8">
-            <div className="text-6xl mb-6">📅</div>
             <h1 className="text-4xl font-bold mb-4">Events</h1>
           </div>
 
@@ -84,11 +85,11 @@ const Audio = forwardRef<AudioRef, AudioProps>(
           {/* Recordings Section */}
           <div className="max-w-2xl mx-auto space-y-6">
             <h2 className="text-2xl font-bold text-white/90">Recordings:</h2>
-            <p className="text-lg text-white/90 leading-relaxed">
-              Hear our recordings from past events.
+            <p className="text-lg text-white/80 leading-relaxed">
+              Live, improvised, past events!
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {eventsData.events.map((event, index) => (
+              {data.map((event, index) => (
                 <Media
                   key={index}
                   title={event.title}

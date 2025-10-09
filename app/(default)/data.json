@@ -1,21 +1,21 @@
 {
   "upcoming": {
-    "title": "Upcoming Sound Session",
+    "title": "Phoenix Sound Session",
     "date": "Nov, 2025",
     "location": "Phoenix Yoga Studio, Kincumber NSW"
   },
   "events": [
     {
-      "title": "Cosmic Resonance",
-      "date": "Jul, 2025",
-      "location": "Phoenix Yoga Studio, Kincumber NSW",
-      "youtubeId": "NuGws2WUe3s"
-    },
-    {
       "title": "Solar Echo",
       "date": "Aug, 2025",
       "location": "Phoenix Yoga Studio, Kincumber NSW",
       "youtubeId": "4-nYOzD2lAo"
+    },
+    {
+      "title": "Cosmic Resonance",
+      "date": "Jul, 2025",
+      "location": "Phoenix Yoga Studio, Kincumber NSW",
+      "youtubeId": "NuGws2WUe3s"
     }
   ]
 }

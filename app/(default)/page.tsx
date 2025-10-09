@@ -100,7 +100,7 @@ export default function HomePage() {
               fan={150}
               tilt={30}
               autoSpin={true}
-              autoSpinSpeed={0.1}
+              autoSpinSpeed={0.11}
               className="w-full h-full"
               onItemClick={handleItemClick}
             >
