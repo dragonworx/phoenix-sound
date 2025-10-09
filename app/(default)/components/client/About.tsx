@@ -54,9 +54,9 @@ export default function About({ focused = false }: AboutProps) {
             </div>
             <h2 className="text-2xl font-bold mb-3">Ali Chamas</h2>
             <p className="text-white/90 leading-relaxed">
-              Live musician and producer including film and television. Creates
-              unique ambient soundscapes through digital fx, loops, and deep
-              textures to send you on an inner journey.
+              Live musician with film and television experience. Creating live
+              spontaneous and unique ambient soundscapes through digital FX,
+              loops, and deep textures to take you on a sonic journey.
             </p>
           </div>
         </div>

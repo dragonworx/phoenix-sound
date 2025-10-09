@@ -120,19 +120,19 @@ export default function HomePage() {
         {/* Focused Item View */}
         {focusedItem !== null && (
           <div
-            className={`absolute inset-0 flex items-center justify-center p-4 z-50 bg-black/40${
+            className={`absolute inset-0 flex items-center justify-center p-4 z-50 bg-black/40 ${
               isAnimating ? "opacity-0" : "opacity-100"
             }`}
           >
             <div
-              className={`relative w-full max-w-4xl max-h-4xl bg-white/10 border border-white/20 rounded-lg shadow-xl${
+              className={`relative w-full max-w-4xl h-[90vh] max-h-[800px] bg-white/10 border border-white/20 rounded-lg shadow-xl flex flex-col ${
                 isAnimating
                   ? "scale-90 translate-y-8 opacity-0"
                   : "scale-100 translate-y-0 opacity-100"
               }`}
             >
               <CloseButton onClose={handleClose} />
-              <div className="p-8 h-full overflow-auto">
+              <div className="p-8 flex-1 overflow-y-auto">
                 {menuItems[focusedItem].focusedComponent}
               </div>
             </div>

@@ -18,7 +18,7 @@ export default {
               scaleY: 0.98,
               translateX: 0.0,
               translateY: 0.0,
-              rotation: 0.05,
+              rotation: 0.001,
               oscillation: {
                 damp: { min: 0.1, max: 0.5, speed: 1.0 }
               }
