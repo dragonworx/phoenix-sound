@@ -7,18 +7,18 @@ export default {
               type: 'perspective',
               position: [0, 0, 0],
               lookAt: [0, 0, -100],
-              fov: 90,
+              fov: 60,
               far: 2000
             },
             background: 'black',
             alpha: true,
             zoomAfterimage: {
               enabled: true,
-              scaleX: 1.005,
-              scaleY: 1.005,
+              scaleX: 0.98,
+              scaleY: 0.98,
               translateX: 0.0,
               translateY: 0.0,
-              rotation: 0.0,
+              rotation: 0.05,
               oscillation: {
                 damp: { min: 0.1, max: 0.5, speed: 1.0 }
               }

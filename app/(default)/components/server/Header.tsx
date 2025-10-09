@@ -14,7 +14,7 @@ const Header = forwardRef<SoundToggleRef, HeaderProps>(
       >
         <div className="flex justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gray-600 rounded-full flex">
+            <div className="w-8 bg-gray-600 rounded-full flex">
               <img
                 src="/img/logo.jpg"
                 alt="Logo"

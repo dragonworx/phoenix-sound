@@ -84,7 +84,11 @@ export default function HomePage() {
 
   return (
     <div className="h-screen relative bg-black">
-      <Header ref={headerRef} onClick={handleItemClick} className="fade-in-header-footer" />
+      <Header
+        ref={headerRef}
+        onClick={handleItemClick}
+        className="fade-in-header-footer"
+      />
 
       <main className="absolute inset-0">
         <div className="fade-in-canvas">
@@ -99,8 +103,8 @@ export default function HomePage() {
             }`}
           >
             <MenuCarrousel
-              fan={120}
-              tilt={25}
+              fan={200}
+              tilt={30}
               autoSpin={true}
               autoSpinSpeed={0.1}
               className="w-full h-full"

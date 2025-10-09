@@ -14,10 +14,10 @@ interface MenuCarrouselProps {
 
 export default function MenuCarrousel({
   children,
-  fan = 60,
+  fan = 260,
   tilt = 15,
   autoSpin = false,
-  autoSpinSpeed = 0.5,
+  autoSpinSpeed = 1.75,
   className = "",
   onItemClick,
 }: MenuCarrouselProps) {
@@ -57,7 +57,7 @@ export default function MenuCarrousel({
       ref={containerRef}
       className={`relative w-full h-full ${className}`}
       style={{
-        perspective: "1000px",
+        perspective: "400px",
         perspectiveOrigin: "50% 50%",
       }}
     >
@@ -71,9 +71,8 @@ export default function MenuCarrousel({
         {React.Children.map(children, (child, index) => {
           const angle = index * angleStep;
           const radians = (angle * Math.PI) / 180;
-          const radius = 300;
-          const x = Math.sin(radians) * radius;
-          const z = Math.cos(radians) * radius;
+          const x = Math.sin(radians) * fan;
+          const z = Math.cos(radians) * fan;
 
           return (
             <div
@@ -81,7 +80,7 @@ export default function MenuCarrousel({
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
               style={{
                 transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${-rotation}deg)`,
-                zIndex: Math.round((z + radius) * 10),
+                zIndex: Math.round((z + fan) * 10),
               }}
               onClick={() => onItemClick?.(index)}
             >
