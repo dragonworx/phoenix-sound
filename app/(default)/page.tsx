@@ -9,6 +9,7 @@ import MenuCarrousel from "./components/client/MenuCarrousel";
 import CloseButton from "./components/client/CloseButton";
 import About from "./components/client/About";
 import Audio, { type AudioRef } from "./components/client/Events";
+import { type SoundToggleRef } from "./components/client/SoundToggle";
 
 export default function HomePage() {
   const [focusedItem, setFocusedItem] = useState<number | null>(null);
@@ -16,9 +17,7 @@ export default function HomePage() {
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const hasPlayingVideoRef = useRef(false);
   const audioComponentRef = useRef<AudioRef | null>(null);
-  const headerRef = useRef<{ stop: () => void; toggle: () => void } | null>(
-    null
-  );
+  const headerRef = useRef<SoundToggleRef | null>(null);
 
   const handleVideoStateChange = (hasPlayingVideo: boolean) => {
     hasPlayingVideoRef.current = hasPlayingVideo;
