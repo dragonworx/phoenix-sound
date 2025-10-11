@@ -14,11 +14,11 @@ export default {
             alpha: true,
             zoomAfterimage: {
               enabled: true,
-              scaleX: 0.99,
+              scaleX: 0.9,
               scaleY: 0.98,
               translateX: 0.0,
               translateY: 0.0,
-              rotation: 0.001,
+              rotation: 0.01,
               oscillation: {
                 damp: { min: 0.1, max: 0.5, speed: 1.5 }
               }
@@ -27,10 +27,10 @@ export default {
             // Starfield settings
             distributionType: 'radial',
             maxStars: 800,
-            speed: 1,
+            speed: 2,
             cameraSpeed: 20,
             drift: true,
-            driftSpeed: 0.5,
+            driftSpeed: 0.9,
             minDriftDuration: 3.0,
             maxDriftDuration: 10.0,
             blendMode: 'screen'

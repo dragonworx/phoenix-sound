@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import * as THREE from "three";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -25,6 +25,7 @@ interface ThreeRendererProps {
   ) => void;
   onUpdate?: (deltaTime: number, elapsedTime: number) => void;
   onResize?: (width: number, height: number) => void;
+  onCanvasClick?: () => void;
 }
 
 // Legacy interface for backwards compatibility if needed
@@ -55,6 +56,7 @@ export default function ThreeRenderer({
   onInit,
   onUpdate,
   onResize,
+  onCanvasClick,
 }: ThreeRendererProps) {
   // Extract renderer settings from config with defaults
   const sizing = config.sizing ?? { mode: "auto-fill" };
@@ -85,6 +87,10 @@ export default function ThreeRenderer({
   const animationIdRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleCanvasClick = useCallback(() => {
+    onCanvasClick?.();
+  }, [onCanvasClick]);
 
   const createCamera = useCallback(
     (width: number, height: number): THREE.Camera => {
@@ -419,11 +425,12 @@ export default function ThreeRenderer({
     display: "block",
     width: "100%",
     height: "100%",
+    cursor: "pointer",
   };
 
   return (
     <div ref={containerRef} style={containerStyle}>
-      <canvas ref={canvasRef} style={canvasStyle} />
+      <canvas ref={canvasRef} style={canvasStyle} onClick={handleCanvasClick} />
     </div>
   );
 }

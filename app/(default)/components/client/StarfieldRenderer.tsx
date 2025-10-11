@@ -11,10 +11,12 @@ import {
 
 interface StarfieldRendererProps {
   config?: Partial<StarfieldConfig>;
+  onCanvasClick?: () => void;
 }
 
 export default function StarfieldRenderer({
   config: userConfig = {},
+  onCanvasClick,
 }: StarfieldRendererProps) {
   // Merge user config with defaults and memoize to prevent unnecessary re-renders
   const finalConfig: StarfieldConfig = useMemo(
@@ -42,6 +44,11 @@ export default function StarfieldRenderer({
   }, []);
 
   return (
-    <ThreeRenderer config={finalConfig} onInit={onInit} onUpdate={onUpdate} />
+    <ThreeRenderer
+      config={finalConfig}
+      onInit={onInit}
+      onUpdate={onUpdate}
+      onCanvasClick={onCanvasClick}
+    />
   );
 }

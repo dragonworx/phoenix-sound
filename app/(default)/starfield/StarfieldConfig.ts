@@ -148,7 +148,7 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   shadowMapType: THREE.PCFSoftShadowMap,
   zoomAfterimage: {
     enabled: true,
-    damp: 0.96,
+    damp: 0.1,
     scaleX: 1.003,
     scaleY: 1.003,
     translateX: 0.0,
@@ -196,11 +196,11 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   phoenixPulseSpeed: 0.8,
   phoenixPulseAmplitude: 20,
   phoenixBloom: true,
-  phoenixBloomStrength: 3,
+  phoenixBloomStrength: 10,
   phoenixBloomOscillate: true,
-  phoenixBloomOscillateSpeed: 1.5,
+  phoenixBloomOscillateSpeed: 1.0,
   phoenixBloomMin: 0.8,
-  phoenixBloomMax: 3.2,
+  phoenixBloomMax: 8,
 
   // Performance
   instanceBatchSize: 100,

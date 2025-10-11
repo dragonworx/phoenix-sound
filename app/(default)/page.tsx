@@ -16,7 +16,9 @@ export default function HomePage() {
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const hasPlayingVideoRef = useRef(false);
   const audioComponentRef = useRef<AudioRef | null>(null);
-  const headerRef = useRef<{ stop: () => void } | null>(null);
+  const headerRef = useRef<{ stop: () => void; toggle: () => void } | null>(
+    null
+  );
 
   const handleVideoStateChange = (hasPlayingVideo: boolean) => {
     hasPlayingVideoRef.current = hasPlayingVideo;
@@ -24,6 +26,10 @@ export default function HomePage() {
 
   const handleVideoPlay = () => {
     headerRef.current?.stop();
+  };
+
+  const handleCanvasClick = () => {
+    headerRef.current?.toggle();
   };
 
   const menuItems = [
@@ -86,11 +92,11 @@ export default function HomePage() {
 
       <main className="absolute inset-0">
         <div className="fade-in-canvas">
-          <StarfieldRenderer config={config} />
+          <StarfieldRenderer config={config} onCanvasClick={handleCanvasClick} />
         </div>
 
         {/* Floating Menu Carrousel */}
-        {focusedItem === null && (
+        {/* {focusedItem === null && (
           <div
             className={`absolute inset-0 pointer-events-none ${
               !hasInitiallyLoaded ? "fade-in-carousel" : ""
@@ -109,7 +115,7 @@ export default function HomePage() {
               ))}
             </MenuCarrousel>
           </div>
-        )}
+        )} */}
 
         {/* Focused Item View */}
         {focusedItem !== null && (

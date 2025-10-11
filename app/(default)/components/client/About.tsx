@@ -1,5 +1,5 @@
 import MenuItem from "./MenuItem";
-import { GALAXY_IMAGES } from "./MenuItem";
+import FocusedFrame from "./FocusedFrame";
 
 interface AboutProps {
   focused?: boolean;
@@ -7,23 +7,8 @@ interface AboutProps {
 
 export default function About({ focused = false }: AboutProps) {
   if (focused) {
-    const galaxyImage = GALAXY_IMAGES[0];
-
     return (
-      <div
-        className="text-white"
-        style={{
-          background: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(4, 41, 84, 0.7)), url(${galaxyImage})`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          borderRadius: "12px",
-          padding: "24px",
-        }}
-      >
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">About Phoenix Sound</h1>
-        </div>
+      <FocusedFrame imageIndex={0} title="Phoenix Sound Team">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
           {/* Liz Column */}
           <div className="flex flex-col items-center text-center">
@@ -35,6 +20,7 @@ export default function About({ focused = false }: AboutProps) {
               />
             </div>
             <h2 className="text-2xl font-bold mb-3">Liz Chamas ❤️</h2>
+            <h3 className="text-2xs text-white/80 font-bold mb-3">Movement</h3>
             <p className="text-white/90 leading-relaxed">
               Founder of Phoenix Studio with 30 years of experience as a dancer,
               clinical pilates educator, and somatic movement practitioner.
@@ -53,6 +39,7 @@ export default function About({ focused = false }: AboutProps) {
               />
             </div>
             <h2 className="text-2xl font-bold mb-3">Ali Chamas 🔥</h2>
+            <h3 className="text-2xs text-white/80 font-bold mb-3">Music</h3>
             <p className="text-white/90 leading-relaxed">
               Seasoned musician with a unique live setup, improvising
               spontaneous and unique ambient soundscapes through digital FX,
@@ -60,7 +47,7 @@ export default function About({ focused = false }: AboutProps) {
             </p>
           </div>
         </div>
-      </div>
+      </FocusedFrame>
     );
   }
 

@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import SoundToggle, { type SoundToggleRef } from "../client/SoundToggle";
+import GlowWrapper from "../client/GlowWrapper";
 
 export interface HeaderProps {
   onClick: (index: number) => void;
@@ -29,19 +30,25 @@ const Header = forwardRef<SoundToggleRef, HeaderProps>(
             </h1>
           </div>
           <div className="flex items-center space-x-2.5">
-            <SoundToggle ref={ref} />
-            <button
-              className="text-white hover:text-gray-300"
-              onClick={() => onClick(0)}
-            >
-              About
-            </button>
-            <button
-              className="text-white hover:text-gray-300"
-              onClick={() => onClick(1)}
-            >
-              Events
-            </button>
+            <GlowWrapper delay={5000} frequency={2} repeat={20}>
+              <SoundToggle ref={ref} />
+            </GlowWrapper>
+            <GlowWrapper delay={6000} frequency={4} repeat={20}>
+              <button
+                className="text-white hover:text-gray-300"
+                onClick={() => onClick(0)}
+              >
+                Team
+              </button>
+            </GlowWrapper>
+            <GlowWrapper delay={7000} frequency={8} repeat={20}>
+              <button
+                className="text-white hover:text-gray-300"
+                onClick={() => onClick(1)}
+              >
+                Events
+              </button>
+            </GlowWrapper>
           </div>
         </div>
       </header>

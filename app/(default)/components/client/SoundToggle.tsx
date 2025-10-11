@@ -1,59 +1,95 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
+import { SeamlessAudioLoop } from "@/lib/SeamlessAudioLoop";
 
 export interface SoundToggleRef {
   stop: () => void;
+  toggle: () => void;
+  setPlaying: (playing: boolean) => void;
 }
 
-const SoundToggle = forwardRef<SoundToggleRef, {}>((props, ref) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+interface SoundToggleProps {
+  onToggle?: (isPlaying: boolean) => void;
+}
+
+const SoundToggle = forwardRef<SoundToggleRef, SoundToggleProps>(
+  ({ onToggle }, ref) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioLoopRef = useRef<SeamlessAudioLoop | null>(null);
 
   useEffect(() => {
-    // Create audio element on mount
-    const audio = new Audio('/loop.mp3');
-    audio.loop = true;
-    audio.preload = 'auto';
-    audioRef.current = audio;
+    // Initialize seamless audio loop on mount
+    audioLoopRef.current = new SeamlessAudioLoop({
+      url: "/loop.mp3",
+      volume: 1.0,
+      onError: (error) => {
+        console.error("Error with audio loop:", error);
+      },
+    });
 
     // Cleanup on unmount
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
+      if (audioLoopRef.current) {
+        audioLoopRef.current.dispose();
+        audioLoopRef.current = null;
       }
     };
   }, []);
 
+  const toggleSound = async () => {
+    if (!audioLoopRef.current) return;
+
+    try {
+      const newPlayingState = await audioLoopRef.current.toggle();
+      setIsPlaying(newPlayingState);
+      onToggle?.(newPlayingState);
+    } catch (error) {
+      console.error("Error toggling audio:", error);
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     stop: () => {
-      if (audioRef.current && isPlaying) {
-        audioRef.current.pause();
+      if (audioLoopRef.current && isPlaying) {
+        audioLoopRef.current.stop();
         setIsPlaying(false);
+        onToggle?.(false);
+      }
+    },
+    toggle: () => {
+      toggleSound();
+    },
+    setPlaying: async (playing: boolean) => {
+      if (!audioLoopRef.current) return;
+
+      try {
+        if (playing && !isPlaying) {
+          await audioLoopRef.current.play();
+          setIsPlaying(true);
+          onToggle?.(true);
+        } else if (!playing && isPlaying) {
+          audioLoopRef.current.stop();
+          setIsPlaying(false);
+          onToggle?.(false);
+        }
+      } catch (error) {
+        console.error("Error setting playing state:", error);
       }
     },
   }));
-
-  const toggleSound = () => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().catch((error) => {
-        console.error('Error playing audio:', error);
-      });
-      setIsPlaying(true);
-    }
-  };
 
   return (
     <button
       onClick={toggleSound}
       className="text-white hover:text-gray-300 transition-colors"
-      aria-label={isPlaying ? 'Mute sound' : 'Play sound'}
+      aria-label={isPlaying ? "Mute sound" : "Play sound"}
     >
       {isPlaying ? (
         <svg
@@ -94,8 +130,9 @@ const SoundToggle = forwardRef<SoundToggleRef, {}>((props, ref) => {
       )}
     </button>
   );
-});
+}
+);
 
-SoundToggle.displayName = 'SoundToggle';
+SoundToggle.displayName = "SoundToggle";
 
 export default SoundToggle;

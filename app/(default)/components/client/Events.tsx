@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useImperativeHandle, forwardRef, useMemo } from "react";
-import MenuItem, { GALAXY_IMAGES } from "./MenuItem";
+import MenuItem from "./MenuItem";
 import Media from "./Media";
 import Event from "./Event";
+import FocusedFrame from "./FocusedFrame";
 import eventsData from "../../data.json";
 
 // UPCOMING EVENTS CONFIGURATION
@@ -42,69 +43,56 @@ const Audio = forwardRef<AudioRef, AudioProps>(
     const data = useMemo(() => eventsData.events, []);
 
     if (focused) {
-      const galaxyImage = GALAXY_IMAGES[2];
       const upcoming = eventsData.upcoming;
 
       return (
-        <div
-          className="text-white"
-          style={{
-            background: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(4, 41, 84, 0.7)), url(${galaxyImage})`,
-            backgroundPosition: "center",
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            borderRadius: "12px",
-            padding: "24px",
-          }}
-        >
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">Events</h1>
-          </div>
-
-          {/* Upcoming Events Section */}
-          <div className="max-w-2xl mx-auto space-y-6 mb-12">
-            <h2 className="text-2xl font-bold text-white/90">
-              Upcoming Events:
-            </h2>
-            {SHOW_UPCOMING_EVENTS ? (
-              <Event
-                title={upcoming.title}
-                date={upcoming.date}
-                location={upcoming.location}
-                isUpcoming={true}
-              />
-            ) : (
-              <div className="bg-white/5 p-8 rounded-lg border border-white/10 text-center">
-                <p className="text-lg text-white/70">
-                  No upcoming events scheduled at this time. Check back soon!
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Recordings Section */}
+        <FocusedFrame imageIndex={2} title="Events">
           <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-2xl font-bold text-white/90">Recordings:</h2>
-            <p className="text-lg text-white/80 leading-relaxed">
-              Live, improvised, past events!
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {data.map((event, index) => (
-                <Media
-                  key={index}
-                  title={event.title}
-                  date={event.date}
-                  location={event.location}
-                  youtubeId={event.youtubeId}
-                  isPlaying={playingIndex === index}
-                  onPlay={() => handlePlayVideo(index)}
-                  onStop={handleStopVideo}
-                  shouldHide={playingIndex !== null && playingIndex !== index}
+            {/* Upcoming Events Section */}
+            <div className="space-y-6 mb-12">
+              <h2 className="text-2xl font-bold text-white/90">
+                Upcoming Events:
+              </h2>
+              {SHOW_UPCOMING_EVENTS ? (
+                <Event
+                  title={upcoming.title}
+                  date={upcoming.date}
+                  location={upcoming.location}
+                  isUpcoming={true}
                 />
-              ))}
+              ) : (
+                <div className="bg-white/5 p-8 rounded-lg border border-white/10 text-center">
+                  <p className="text-lg text-white/70">
+                    No upcoming events scheduled at this time. Check back soon!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Recordings Section */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-white/90">Recordings:</h2>
+              <p className="text-lg text-white/80 leading-relaxed">
+                Live, improvised, past events!
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                {data.map((event, index) => (
+                  <Media
+                    key={index}
+                    title={event.title}
+                    date={event.date}
+                    location={event.location}
+                    youtubeId={event.youtubeId}
+                    isPlaying={playingIndex === index}
+                    onPlay={() => handlePlayVideo(index)}
+                    onStop={handleStopVideo}
+                    shouldHide={playingIndex !== null && playingIndex !== index}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </FocusedFrame>
       );
     }
 
