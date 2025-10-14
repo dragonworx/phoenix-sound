@@ -13,6 +13,7 @@ export interface SoundToggleRef {
   stop: () => void;
   toggle: () => void;
   setPlaying: (playing: boolean) => void;
+  isPlaying: () => boolean;
 }
 
 interface SoundToggleProps {
@@ -83,7 +84,10 @@ const SoundToggle = forwardRef<SoundToggleRef, SoundToggleProps>(
         console.error("Error setting playing state:", error);
       }
     },
-  }));
+    isPlaying: () => {
+      return isPlaying;
+    },
+  }), [isPlaying, onToggle]);
 
   return (
     <button

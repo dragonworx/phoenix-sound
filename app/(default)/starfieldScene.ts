@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 import { StarfieldManager } from './starfield/StarfieldManager';
 import { StarfieldConfig, DEFAULT_STARFIELD_CONFIG } from './starfield/StarfieldConfig';
+import { InteractionParticleSystem } from './starfield/InteractionParticles';
 
 // Global state for the starfield system
 let starfieldManager: StarfieldManager | null = null;
+let interactionParticles: InteractionParticleSystem | null = null;
 let lastTime: number = 0;
+let currentCamera: THREE.Camera | null = null;
 
 /**
  * Starfield scene with infinite movement through space
@@ -25,6 +28,12 @@ export const starfieldScene = (
   // Initialize starfield manager
   starfieldManager = new StarfieldManager(finalConfig, scene, camera);
 
+  // Initialize interaction particle system
+  interactionParticles = new InteractionParticleSystem(finalConfig, scene);
+
+  // Store camera reference
+  currentCamera = camera;
+
   // Set up camera initial position and settings
   setupCamera(camera);
 };
@@ -33,10 +42,15 @@ export const starfieldScene = (
  * Update function to be called each frame
  */
 export const updateStarfieldScene = (deltaTime: number, elapsedTime: number): void => {
-  if (!starfieldManager) return;
+  if (!starfieldManager || !currentCamera) return;
 
   // Update starfield system
   starfieldManager.update(deltaTime);
+
+  // Update interaction particles
+  if (interactionParticles) {
+    interactionParticles.update(deltaTime, currentCamera);
+  }
 
   lastTime = elapsedTime;
 };
@@ -80,6 +94,15 @@ function setupCamera(camera: THREE.Camera): void {
 }
 
 /**
+ * Handle user interaction (click/touch)
+ */
+export const handleInteraction = (worldPosition: THREE.Vector3, camera: THREE.Camera): void => {
+  if (interactionParticles) {
+    interactionParticles.emitFromPosition(worldPosition, camera);
+  }
+};
+
+/**
  * Configuration utilities
  */
 export const starfieldUtils = {
@@ -118,4 +141,11 @@ export const disposeStarfieldScene = (): void => {
     starfieldManager.dispose();
     starfieldManager = null;
   }
+
+  if (interactionParticles) {
+    interactionParticles.dispose();
+    interactionParticles = null;
+  }
+
+  currentCamera = null;
 };

@@ -149,7 +149,7 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
   zoomAfterimage: {
     enabled: true,
     damp: 0.1,
-    scaleX: 1.003,
+    scaleX: 1.103,
     scaleY: 1.003,
     translateX: 0.0,
     translateY: 0.0,
@@ -157,7 +157,9 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
     oscillation: {
       damp: { min: 0.94, max: 0.98, speed: 0.15 },
       scaleX: { min: 1.001, max: 1.005, speed: 0.08 },
-      scaleY: { min: 1.001, max: 1.005, speed: 0.08 }
+      scaleY: { min: 1.001, max: 1.005, speed: 0.08 },
+      translateX: { min: 0.0, max: 0.1, speed: 1.0 },
+      translateY: { min: 0.0, max: 0.1, speed: 2.0 }
     }
   },
 

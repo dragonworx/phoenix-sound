@@ -26,6 +26,7 @@ interface ThreeRendererProps {
   onUpdate?: (deltaTime: number, elapsedTime: number) => void;
   onResize?: (width: number, height: number) => void;
   onCanvasClick?: () => void;
+  onCanvasInteraction?: (worldPosition: THREE.Vector3, camera: THREE.Camera) => void;
 }
 
 // Legacy interface for backwards compatibility if needed
@@ -57,6 +58,7 @@ export default function ThreeRenderer({
   onUpdate,
   onResize,
   onCanvasClick,
+  onCanvasInteraction,
 }: ThreeRendererProps) {
   // Extract renderer settings from config with defaults
   const sizing = config.sizing ?? { mode: "auto-fill" };
@@ -87,10 +89,68 @@ export default function ThreeRenderer({
   const animationIdRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef<boolean>(false);
 
-  const handleCanvasClick = useCallback(() => {
-    onCanvasClick?.();
-  }, [onCanvasClick]);
+  const getWorldPositionFromEvent = useCallback(
+    (clientX: number, clientY: number): THREE.Vector3 | null => {
+      if (!canvasRef.current || !cameraRef.current || !containerRef.current) return null;
+
+      const rect = canvasRef.current.getBoundingClientRect();
+
+      // Convert to normalized device coordinates (-1 to +1)
+      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+      // Create raycaster
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(new THREE.Vector2(x, y), cameraRef.current);
+
+      // Project point at galaxy background depth (far away in the scene)
+      // This matches where the visual galaxy background is positioned
+      const distance = 300; // Mid-range in the starfield distribution
+      const worldPosition = raycaster.ray.origin
+        .clone()
+        .add(raycaster.ray.direction.clone().multiplyScalar(distance));
+
+      return worldPosition;
+    },
+    []
+  );
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      isDraggingRef.current = true;
+
+      // Trigger canvas click on pointer down
+      onCanvasClick?.();
+
+      if (onCanvasInteraction && cameraRef.current) {
+        const worldPosition = getWorldPositionFromEvent(event.clientX, event.clientY);
+        if (worldPosition) {
+          onCanvasInteraction(worldPosition, cameraRef.current);
+        }
+      }
+    },
+    [onCanvasInteraction, getWorldPositionFromEvent, onCanvasClick]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      if (!isDraggingRef.current) return;
+
+      if (onCanvasInteraction && cameraRef.current) {
+        const worldPosition = getWorldPositionFromEvent(event.clientX, event.clientY);
+        if (worldPosition) {
+          onCanvasInteraction(worldPosition, cameraRef.current);
+        }
+      }
+    },
+    [onCanvasInteraction, getWorldPositionFromEvent]
+  );
+
+  const handlePointerUp = useCallback(() => {
+    isDraggingRef.current = false;
+  }, []);
 
   const createCamera = useCallback(
     (width: number, height: number): THREE.Camera => {
@@ -430,7 +490,14 @@ export default function ThreeRenderer({
 
   return (
     <div ref={containerRef} style={containerStyle}>
-      <canvas ref={canvasRef} style={canvasStyle} onClick={handleCanvasClick} />
+      <canvas
+        ref={canvasRef}
+        style={canvasStyle}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      />
     </div>
   );
 }

@@ -28,7 +28,11 @@ export default function HomePage() {
   };
 
   const handleCanvasClick = () => {
-    headerRef.current?.toggle();
+    // Only toggle sound on if it's not already playing
+    // After first activation, let user control sound via header button only
+    if (headerRef.current && !headerRef.current.isPlaying()) {
+      headerRef.current.toggle();
+    }
   };
 
   const menuItems = [

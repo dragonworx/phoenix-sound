@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from "react";
 import * as THREE from "three";
 import ThreeRenderer from "./ThreeRenderer";
-import { starfieldScene, updateStarfieldScene } from "../../starfieldScene";
+import { starfieldScene, updateStarfieldScene, handleInteraction } from "../../starfieldScene";
 import {
   StarfieldConfig,
   DEFAULT_STARFIELD_CONFIG,
@@ -43,12 +43,20 @@ export default function StarfieldRenderer({
     updateStarfieldScene(deltaTime, elapsedTime);
   }, []);
 
+  const onCanvasInteraction = useCallback(
+    (worldPosition: THREE.Vector3, camera: THREE.Camera) => {
+      handleInteraction(worldPosition, camera);
+    },
+    []
+  );
+
   return (
     <ThreeRenderer
       config={finalConfig}
       onInit={onInit}
       onUpdate={onUpdate}
       onCanvasClick={onCanvasClick}
+      onCanvasInteraction={onCanvasInteraction}
     />
   );
 }
