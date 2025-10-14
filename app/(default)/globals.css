@@ -13,8 +13,19 @@
     user-select: none;
 }
 
-body {
+html, body {
     overflow: hidden;
+    overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    /* Prevent pull-to-refresh on mobile browsers */
+    overscroll-behavior-y: none;
 }
 
 /* Fade-in animations for staggered page reveal */

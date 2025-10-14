@@ -49,17 +49,32 @@ export class SeamlessAudioLoop {
   }
 
   /**
-   * Initialize the audio context and load the audio file
+   * Initialize the audio context (must be called synchronously during user gesture for iOS)
+   */
+  private initializeAudioContext(): void {
+    if (this.audioContext) return;
+
+    // Create audio context (handles browser prefixes automatically)
+    // IMPORTANT: This must be called synchronously during a user gesture for iOS
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // Create gain node for volume control
+    this.gainNode = this.audioContext.createGain();
+    this.gainNode.gain.value = this.volume;
+    this.gainNode.connect(this.audioContext.destination);
+  }
+
+  /**
+   * Load and decode the audio file
    */
   async initialize(): Promise<void> {
     try {
-      // Create audio context (handles browser prefixes automatically)
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Ensure audio context is initialized
+      this.initializeAudioContext();
 
-      // Create gain node for volume control
-      this.gainNode = this.audioContext.createGain();
-      this.gainNode.gain.value = this.volume;
-      this.gainNode.connect(this.audioContext.destination);
+      if (!this.audioContext) {
+        throw new Error('Failed to initialize audio context');
+      }
 
       // Load and decode audio file
       const response = await fetch(this.url);
@@ -152,17 +167,25 @@ export class SeamlessAudioLoop {
   async play(): Promise<void> {
     if (this.isPlaying) return;
 
-    if (!this.isLoaded) {
-      await this.initialize();
-    }
+    // CRITICAL: Initialize AudioContext synchronously during user gesture for iOS
+    this.initializeAudioContext();
 
-    if (!this.audioContext || !this.audioBuffer || !this.gainNode) {
-      throw new Error('Audio context not initialized');
+    if (!this.audioContext) {
+      throw new Error('Failed to create audio context');
     }
 
     // Resume audio context if suspended (required for mobile browsers)
     if (this.audioContext.state === 'suspended') {
       await this.audioContext.resume();
+    }
+
+    // Load audio file if not already loaded
+    if (!this.isLoaded) {
+      await this.initialize();
+    }
+
+    if (!this.audioBuffer || !this.gainNode) {
+      throw new Error('Audio buffer not loaded');
     }
 
     this.isPlaying = true;

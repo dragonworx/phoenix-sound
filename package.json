@@ -14,14 +14,9 @@
     "docker:fresh": "bun run docker:clean && bun run docker:dev",
     "docker:build": "docker compose --progress=plain build web-prod",
     "docker:prod": "docker compose up -d web-prod",
-    "docker:db": "docker compose up postgres pgadmin",
-    "docker:full": "docker compose up",
+    "docker:release": "docker compose --progress=plain build web-prod && docker compose up -d web-prod",
     "docker:logs": "docker compose logs -f",
     "docker:restart": "docker compose restart",
-    "db:seed": "node scripts/seed-admin.js",
-    "db:seed:password": "node scripts/seed-admin.js --password",
-    "pgadmin": "echo '🔗 pgAdmin: http://localhost:5050' && echo '📧 Email: admin@phoenixsound.com' && echo '🔑 Password: admin_password'",
-    "admin": "echo '🔗 Admin Panel: http://localhost:3000/admin/login'",
     "kill3000": "lsof -ti :3000 | xargs -r kill -9 2>/dev/null || echo 'Port 3000 is free'"
   },
   "devDependencies": {

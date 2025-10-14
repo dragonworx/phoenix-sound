@@ -152,6 +152,30 @@ export default function ThreeRenderer({
     isDraggingRef.current = false;
   }, []);
 
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLCanvasElement>) => {
+      // Prevent default to stop page scrolling/bouncing on mobile
+      event.preventDefault();
+    },
+    []
+  );
+
+  const handleTouchMove = useCallback(
+    (event: React.TouchEvent<HTMLCanvasElement>) => {
+      // Prevent default to stop page scrolling/bouncing on mobile
+      event.preventDefault();
+    },
+    []
+  );
+
+  const handleTouchEnd = useCallback(
+    (event: React.TouchEvent<HTMLCanvasElement>) => {
+      // Prevent default to stop page scrolling/bouncing on mobile
+      event.preventDefault();
+    },
+    []
+  );
+
   const createCamera = useCallback(
     (width: number, height: number): THREE.Camera => {
       const aspect = width / height;
@@ -486,6 +510,7 @@ export default function ThreeRenderer({
     width: "100%",
     height: "100%",
     cursor: "pointer",
+    touchAction: "none",
   };
 
   return (
@@ -497,6 +522,9 @@ export default function ThreeRenderer({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       />
     </div>
   );
