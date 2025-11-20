@@ -58,6 +58,7 @@ const Audio = forwardRef<AudioRef, AudioProps>(
                   title={upcoming.title}
                   date={upcoming.date}
                   location={upcoming.location}
+                  url={upcoming.url}
                   isUpcoming={true}
                 />
               ) : (
