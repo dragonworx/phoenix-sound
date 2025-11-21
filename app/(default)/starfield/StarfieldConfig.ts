@@ -151,9 +151,9 @@ export const DEFAULT_STARFIELD_CONFIG: StarfieldConfig = {
     damp: 0.1,
     scaleX: 1.103,
     scaleY: 1.003,
-    translateX: 0.0,
-    translateY: 0.0,
-    rotation: 0.0,
+    translateX: 10.0,
+    translateY: -10.0,
+    rotation: 0.5,
     oscillation: {
       damp: { min: 0.94, max: 0.98, speed: 0.15 },
       scaleX: { min: 1.001, max: 1.005, speed: 0.08 },

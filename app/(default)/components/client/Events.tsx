@@ -3,7 +3,7 @@
 import { useState, useImperativeHandle, forwardRef, useMemo } from "react";
 import MenuItem from "./MenuItem";
 import Media from "./Media";
-import Event from "./Event";
+import UpComing from "./UpComing";
 import FocusedFrame from "./FocusedFrame";
 import eventsData from "../../data.json";
 
@@ -49,26 +49,7 @@ const Audio = forwardRef<AudioRef, AudioProps>(
         <FocusedFrame imageIndex={2} title="Events">
           <div className="max-w-2xl mx-auto space-y-6">
             {/* Upcoming Events Section */}
-            <div className="space-y-6 mb-12">
-              <h2 className="text-2xl font-bold text-white/90">
-                Upcoming Events:
-              </h2>
-              {SHOW_UPCOMING_EVENTS ? (
-                <Event
-                  title={upcoming.title}
-                  date={upcoming.date}
-                  location={upcoming.location}
-                  url={upcoming.url}
-                  isUpcoming={true}
-                />
-              ) : (
-                <div className="bg-white/5 p-8 rounded-lg border border-white/10 text-center">
-                  <p className="text-lg text-white/70">
-                    No upcoming events scheduled at this time. Check back soon!
-                  </p>
-                </div>
-              )}
-            </div>
+            <UpComing data={upcoming} showUpcoming={SHOW_UPCOMING_EVENTS} />
 
             {/* Recordings Section */}
             <div className="space-y-6">

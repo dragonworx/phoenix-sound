@@ -26,7 +26,10 @@ interface ThreeRendererProps {
   onUpdate?: (deltaTime: number, elapsedTime: number) => void;
   onResize?: (width: number, height: number) => void;
   onCanvasClick?: () => void;
-  onCanvasInteraction?: (worldPosition: THREE.Vector3, camera: THREE.Camera) => void;
+  onCanvasInteraction?: (
+    worldPosition: THREE.Vector3,
+    camera: THREE.Camera
+  ) => void;
 }
 
 // Legacy interface for backwards compatibility if needed
@@ -90,10 +93,13 @@ export default function ThreeRenderer({
   const lastTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef<boolean>(false);
+  const lastMousePositionRef = useRef<{ x: number; y: number } | null>(null);
+  const emissionIntervalRef = useRef<number | null>(null);
 
   const getWorldPositionFromEvent = useCallback(
     (clientX: number, clientY: number): THREE.Vector3 | null => {
-      if (!canvasRef.current || !cameraRef.current || !containerRef.current) return null;
+      if (!canvasRef.current || !cameraRef.current || !containerRef.current)
+        return null;
 
       const rect = canvasRef.current.getBoundingClientRect();
 
@@ -117,29 +123,79 @@ export default function ThreeRenderer({
     []
   );
 
+  const startContinuousEmission = useCallback(() => {
+    // Clear any existing interval
+    if (emissionIntervalRef.current !== null) {
+      clearInterval(emissionIntervalRef.current);
+    }
+
+    // Start emitting particles continuously at ~60fps
+    emissionIntervalRef.current = window.setInterval(() => {
+      if (
+        isDraggingRef.current &&
+        lastMousePositionRef.current &&
+        onCanvasInteraction &&
+        cameraRef.current
+      ) {
+        const worldPosition = getWorldPositionFromEvent(
+          lastMousePositionRef.current.x,
+          lastMousePositionRef.current.y
+        );
+        if (worldPosition) {
+          onCanvasInteraction(worldPosition, cameraRef.current);
+        }
+      }
+    }, 1000 / 1000); // ~60 emissions per second
+  }, [onCanvasInteraction, getWorldPositionFromEvent]);
+
+  const stopContinuousEmission = useCallback(() => {
+    if (emissionIntervalRef.current !== null) {
+      clearInterval(emissionIntervalRef.current);
+      emissionIntervalRef.current = null;
+    }
+  }, []);
+
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLCanvasElement>) => {
       isDraggingRef.current = true;
+      lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
 
       // Trigger canvas click on pointer down
       onCanvasClick?.();
 
+      // Start continuous emission
+      startContinuousEmission();
+
       if (onCanvasInteraction && cameraRef.current) {
-        const worldPosition = getWorldPositionFromEvent(event.clientX, event.clientY);
+        const worldPosition = getWorldPositionFromEvent(
+          event.clientX,
+          event.clientY
+        );
         if (worldPosition) {
           onCanvasInteraction(worldPosition, cameraRef.current);
         }
       }
     },
-    [onCanvasInteraction, getWorldPositionFromEvent, onCanvasClick]
+    [
+      onCanvasInteraction,
+      getWorldPositionFromEvent,
+      onCanvasClick,
+      startContinuousEmission,
+    ]
   );
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent<HTMLCanvasElement>) => {
+      // Update last mouse position whenever mouse moves
+      lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+
       if (!isDraggingRef.current) return;
 
       if (onCanvasInteraction && cameraRef.current) {
-        const worldPosition = getWorldPositionFromEvent(event.clientX, event.clientY);
+        const worldPosition = getWorldPositionFromEvent(
+          event.clientX,
+          event.clientY
+        );
         if (worldPosition) {
           onCanvasInteraction(worldPosition, cameraRef.current);
         }
@@ -150,7 +206,9 @@ export default function ThreeRenderer({
 
   const handlePointerUp = useCallback(() => {
     isDraggingRef.current = false;
-  }, []);
+    lastMousePositionRef.current = null;
+    stopContinuousEmission();
+  }, [stopContinuousEmission]);
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent<HTMLCanvasElement>) => {
@@ -465,6 +523,9 @@ export default function ThreeRenderer({
     return () => {
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
+      }
+      if (emissionIntervalRef.current !== null) {
+        clearInterval(emissionIntervalRef.current);
       }
       composerRef.current?.dispose();
       renderer.dispose();

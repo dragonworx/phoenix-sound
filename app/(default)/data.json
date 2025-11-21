@@ -1,9 +1,10 @@
 {
   "upcoming": {
-    "title": "Phoenix Sound Session",
+    "title": "The Mojo Trio Returns!",
     "date": "7pm Dec 13, 2025",
     "location": "Phoenix Yoga Studio, Kincumber NSW",
-    "url": "https://clients.mindbodyonline.com/classic/ws?studioid=342683&stype=-104&sView=day&sLoc=0&sTrn=100000063&date=12/13/25"
+    "url": "https://clients.mindbodyonline.com/classic/ws?studioid=342683&stype=-104&sView=day&sLoc=0&sTrn=100000063&date=12/13/25",
+    "thumbnail": "/img/mojo-dec-gig-thumbail.png"
   },
   "events": [
     {
